@@ -12,4 +12,8 @@ trait CommonJsonFormats {
          case Right(value) => fmb.writes(value)
       }
    }
+
+   def typeWrites[T](w : Writes[T]): Writes[T] = {
+      w.transform( js => js.as[JsObject] - "_type"  ++ Json.obj("type" ->  js \ "_type") )
+   }
 }

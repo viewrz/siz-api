@@ -1,17 +1,13 @@
 package formats
 
 import models._
-import play.api.Play
-import play.api.Play.current
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
-trait APIJsonFormats extends CommonJsonFormats {
-  implicit def traversableWrites[A: Writes] = new Writes[Traversable[A]] {
-    def writes(as: Traversable[A]) = JsArray(as.map(Json.toJson(_)).toSeq)
-  }
+import scala.util.matching.Regex
 
+trait APIJsonFormats extends CommonJsonFormats {
   def addHref[T](objType: String, w : Writes[T]): Writes[T] = w.transform {
     js =>
       js.as[JsObject] ++
@@ -44,6 +40,20 @@ trait APIJsonFormats extends CommonJsonFormats {
 
   implicit val errorWrite = Json.writes[Error]
   implicit val emailWrite = addHref("emails",Json.writes[Email])
-  implicit val topLevelWrite = Json.writes[TopLevel]
 
+  implicit val sourceWrite = typeWrites(Json.writes[Source])
+  implicit val videoFormatWrite = typeWrites(Json.writes[VideoFormat])
+  implicit val imageWrite = Json.writes[Image].transform {
+    js =>
+      (js \ "href").as[String] match {
+        case href: String if href.matches("^//[^/].*") =>
+          js.as[JsObject] - "href" ++ Json.obj("href" -> JsString("http:"+href))
+        case _ =>
+          js.as[JsObject]
+      }
+  }
+  implicit val boxesWrite = Json.writes[Boxe]
+  implicit val storyWrite = addHref("stories",Json.writes[Story])
+
+  implicit val topLevelWrite = Json.writes[TopLevel]
 }

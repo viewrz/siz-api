@@ -5,6 +5,7 @@
 # Home page
 GET     /                            controllers.Application.index
 POST    /users                       controllers.Users.create
-GET    /users/:id                   controllers.Users.get(id)
+GET     /users/:id                   controllers.Users.get(id)
 POST    /tokens                      controllers.Users.login
 GET     /emails/:email               controllers.Users.checkEmail(email)
+GET     /stories                     controllers.Stories.getAll(limit: Int ?= 20, orderBy: String ?= "date")
