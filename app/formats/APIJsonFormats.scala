@@ -5,7 +5,6 @@ import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
-import scala.util.matching.Regex
 
 trait APIJsonFormats extends CommonJsonFormats {
   def addHref[T](objType: String, w : Writes[T]): Writes[T] = w.transform {

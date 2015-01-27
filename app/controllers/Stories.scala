@@ -14,7 +14,7 @@ object Stories extends Controller with APIJsonFormats {
       val futureStory = OldStory.getAll(limit,orderBy)
       futureStory.map{
         results =>
-          Ok(Json.toJson(Story.oldStoriesToStories(results)))
+          Ok(Json.toJson(TopLevel(stories = Some(Story.oldStoriesToStories(results)))))
       }.recover {
         case exception: Exception =>
           Logger.error("Story error", exception)
