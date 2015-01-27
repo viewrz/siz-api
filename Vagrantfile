@@ -19,14 +19,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.provision "docker" do |d|
     d.pull_images "mongo"
-    d.pull_images "jdauphant/play-api-example"
+    d.pull_images "jdauphant/siz-api"
     d.pull_images "rethinkdb"
     d.run "mongo"
     d.run "rethinkdb",
        args: "-p 8080:8080"
-    d.run "jdauphant/play-api-example",
+    d.run "jdauphant/siz-api",
        cmd: "sbt run",
-       args: "-t -p 9000:9000 -v /vagrant:/var/www/play-api-example --link mongo:mongo --link rethinkdb:rethinkdb"
+       args: "-t -p 9000:9000 -v /vagrant:/var/www/siz-api --link mongo:mongo --link rethinkdb:rethinkdb"
   end
 
   config.vm.provider "virtualbox" do |v|

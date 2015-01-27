@@ -2,7 +2,7 @@ FROM jdauphant/sbt
 
 MAINTAINER Julien DAUPHANT
 
-ENV PLAY_APP_NAME play-api-example
+ENV PLAY_APP_NAME siz-api
 ENV PLAY_APP_DIR /var/www/$PLAY_APP_NAME
 RUN mkdir -p $PLAY_APP_DIR
 COPY build.sbt $PLAY_APP_DIR/
