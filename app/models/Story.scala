@@ -2,10 +2,11 @@ package models
 
 import java.util.Date
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.rethinkscala.Document
 import com.rethinkscala.Implicits.Async._
 import utils.Hash
+import scala.concurrent.ExecutionContext.Implicits.global
+
 
 case class OldBoxe(height: Int, width: Int, url: String)
 case class OldStory(boxes: Option[List[OldBoxe]],
@@ -56,11 +57,14 @@ case class Story(boxes: List[Boxe],
                  title: String)
 
 object OldStory extends RethinkModel[OldStory]("video"){
-  def getAll(limit: Int, orderBy: String) = table.filter(f=> f.hasFields("boxes")).orderBy(r.desc(orderBy)).limit(limit).as[Seq[OldStory]]
+  def newIdToOldId(newId: String) = newId.substring(0,13).toLong
+  def getAll(limit: Int, orderBy: String) = table.filter(f=> f.hasFields("boxes")).orderBy(orderBy.desc).limit(limit).as[Seq[OldStory]]
+  def getBySlug(slug: String) = table.get(slug).as[OldStory]
+  def getById(id: String) = table.filter(Map("date" -> newIdToOldId(id))).as[Seq[OldStory]].map(_.headOption)
 }
 
 object Story {
-  def oldIdToNewId(id: String, date: Date) = date.getTime.toString+Hash.md5(id).substring(0,11)
+  def oldIdToNewId(oldId: String, date: Date) = date.getTime.toString+Hash.md5(oldId).substring(0,11)
   def oldStoriesToStories(oldStories: Seq[OldStory]): Seq[Story] = oldStories.map(Story.oldStoryToStory)
   def oldStoryToStory(s: OldStory) = Story(Boxe.oldBoxesToBoxes(s.boxes.get, s), s.date, oldIdToNewId(s.id,s.date),s.id, Source.oldStoryToSource(s), Image(s.pictureUrl), s.title)
 }
