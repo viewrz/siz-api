@@ -8,5 +8,5 @@ POST    /users                       controllers.Users.create
 GET     /users/:id                   controllers.Users.get(id)
 POST    /tokens                      controllers.Users.login
 GET     /emails/:email               controllers.Users.checkEmail(email)
-GET     /stories                     controllers.Stories.getAll(limit: Int ?= 20, orderBy: String ?= "date")
+GET     /stories                     controllers.Stories.dispatcher(limit: Int ?= 20, orderBy: String ?= "date", slug: Option[String])
 GET     /stories/:id                 controllers.Stories.getById(id)

@@ -10,7 +10,16 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.libs.json.Json
 
 object Stories extends Controller with APIJsonFormats {
-  def getAll(limit: Int, orderBy: String) = Action.async { request =>
+  def dispatcher(limit: Int, orderBy: String, slug: Option[String]) = Action.async { request =>
+    slug match {
+      case None =>
+        getAll(limit, orderBy)
+      case Some(slug) =>
+        getBySlug(slug)
+    }
+  }
+
+  def getAll(limit: Int, orderBy: String) = {
       val futureStory = OldStory.getAll(limit,orderBy)
       futureStory.map{
         results =>
@@ -27,10 +36,8 @@ object Stories extends Controller with APIJsonFormats {
     }
   }
 
-  def getBySlug(slug: String) = Action.async { request =>
-    OldStory.getBySlug(slug).map {
+  def getBySlug(slug: String) = OldStory.getBySlug(slug).map {
       result =>
        Ok(Json.toJson(TopLevel(stories = Some(Left(Story.oldStoryToStory(result))))))
     }
-  }
 }
