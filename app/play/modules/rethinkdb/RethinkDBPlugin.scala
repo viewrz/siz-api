@@ -1,7 +1,7 @@
 package play.modules.rethinkdb
 
 import com.rethinkscala.ast.DB
-import com.rethinkscala.net.{Async, Version3}
+import com.rethinkscala.net.{Version, Version2, Async}
 import play.api._
 import scala.concurrent.ExecutionContext
 import scala.util.control.NonFatal
@@ -56,7 +56,7 @@ object RethinkDBPlugin {
 
 private[rethinkdb] case class RethinkDBHelper(conf: RethinkDBPlugin.RethinkDBConf, app: Application) {
   implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
-  lazy val version = new Version3(conf.host,conf.port)
+  lazy val version = new Version2(conf.host,conf.port)
   lazy val connection = Async(version)
   lazy val db = DB(conf.dbname)
 }
