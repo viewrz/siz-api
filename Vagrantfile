@@ -12,9 +12,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Every Vagrant virtual environment requires a box to build off of.
   config.vm.box = "yungsang/boot2docker"
   config.vm.synced_folder ".", "/vagrant"
-  
-  config.vm.network :forwarded_port, host: 9000, guest: 9000
   config.vm.network :forwarded_port, guest: 2375, host: 2375, auto_correct: true
+  config.vm.network :forwarded_port, host: 9000, guest: 9000
   config.vm.network "private_network", ip: "192.168.200.44"
 
   config.vm.provision "docker" do |d|

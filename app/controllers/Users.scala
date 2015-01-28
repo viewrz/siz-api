@@ -91,7 +91,7 @@ object Users extends Controller with APIJsonFormats {
       Action.async { request =>
         User.findByEmail(email).map {
           case User(Some(`email`), _, _, _, _, _, _, _) :: Nil =>
-            Ok(Json.toJson(TopLevel(emails = Some(Email(email, "registered")))))
+            Ok(Json.toJson(TopLevel(emails = Some(Left(Email(email, "registered"))))))
           case _ =>
             NotFound(Error.toTopLevelJson(Error("Email not found")))
         }
