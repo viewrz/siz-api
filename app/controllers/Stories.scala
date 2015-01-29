@@ -36,7 +36,7 @@ object Stories extends Controller with APIJsonFormats {
       case RegexId() =>
           OldStory.getById(id).map {
             case None =>
-              NotFound(Error.toTopLevelJson(Error("No story account for this id %s and %s creationDate".format(id,OldStory.newIdToOldId(id)))))
+              NotFound(Error.toTopLevelJson(Error("No story for this id %s and %s creationDate".format(id,OldStory.newIdToOldId(id)))))
             case Some(story) =>
               Ok(Json.toJson(TopLevel(stories = Some(Left(Story.oldStoryToStory(story))))))
           }
