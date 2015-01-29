@@ -6,7 +6,8 @@
 GET     /                                  controllers.Application.index
 POST    /users                             controllers.Users.create
 GET     /users/:id                         controllers.Users.get(id)
-POST    /tokens                            controllers.Users.login
+POST    /tokens                            controllers.Tokens.create
+PUT     /tokens/:id                        controllers.Tokens.update(id)
 GET     /emails/:email                     controllers.Users.checkEmail(email)
 GET     /stories                           controllers.Stories.dispatcher(limit: Int ?= 20, orderBy: String ?= "date", slug: Option[String])
 GET     /stories/$id<[0-9a-z]{24}>         controllers.Stories.getById(id)

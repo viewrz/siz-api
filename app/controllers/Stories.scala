@@ -1,9 +1,9 @@
 package controllers
 
+import actions.TokenCheckAction
 import formats.APIJsonFormats
 
 import models._
-import play.api.Logger
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -13,7 +13,7 @@ import scala.util.matching.Regex
 import scala.concurrent.Future
 
 object Stories extends Controller with APIJsonFormats {
-  def dispatcher(limit: Int, orderBy: String, slug: Option[String]) = Action.async { request =>
+  def dispatcher(limit: Int, orderBy: String, slug: Option[String]) = TokenCheckAction.async { request =>
     slug match {
       case None =>
         getAll(limit, orderBy)
@@ -30,7 +30,7 @@ object Stories extends Controller with APIJsonFormats {
       }
   }
 
-  def getById(id: String) = Action.async { request =>
+  def getById(id: String) = TokenCheckAction.async { request =>
     val RegexId = "[0-9]{13}[0-9a-z]{11}".r
     id match {
       case RegexId() =>

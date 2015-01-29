@@ -1,10 +1,11 @@
 package controllers
 
-import actions.{LoggingAction, TokenCheckAction}
+import actions.{TokenRequest, LoggingAction, TokenCheckAction}
 
 import akka.io.IO
 import akka.util.Timeout
 import akka.pattern.ask
+import controllers.Tokens._
 import play.api.libs.concurrent.Akka
 import spray.can.Http
 import spracebook.SprayClientFacebookGraphApi
@@ -28,37 +29,42 @@ import scala.language.postfixOps
 object Users extends Controller with APIJsonFormats {
 
   def create = LoggingAction{
-      Action.async(BodyParsers.parse.tolerantJson) { request =>
-        val userResult = (request.body \ "users").validate[NewUser]
-        userResult.fold(
-          validationErrors => {
-            Future.successful(BadRequest(Error.toTopLevelJson(validationErrors)))
-          },
-          user => user match {
-            case NewUser(Some(email), Some(passwordHash), _, None) =>
-              createUserByEmail(user)
-            case NewUser(_, None, _, Some(facebookToken)) =>
-              createUserByFacebook(user, facebookToken)
-            case NewUser(None, Some(passwordHash), _, None) =>
-              Future.successful(BadRequest(Error.toTopLevelJson(s"error with field /email : field missing")))
-            case _ =>
-              Logger.debug(s"Impossible to register ${user}")
-              Future.successful(BadRequest(Error.toTopLevelJson(s"You have to specified password or facebookToken to create an user")))
-          }
-        )
+    TokenCheckAction.async(BodyParsers.parse.tolerantJson) { request =>
+      request.token.userId match {
+        case Some(_) =>
+          Future.successful(BadRequest(Error.toTopLevelJson("An user is already logged on this token, discard this token and create a new one.")))
+        case None =>
+          val userResult = (request.body \ "users").validate[NewUser]
+          userResult.fold(
+            validationErrors => {
+              Future.successful(BadRequest(Error.toTopLevelJson(validationErrors)))
+            },
+            user => user match {
+              case NewUser(Some(email), Some(passwordHash), _, None) =>
+                createUserByEmail(user)(request.token)
+              case NewUser(_, None, _, Some(facebookToken)) =>
+                createUserByFacebook(user, facebookToken)(request.token)
+              case NewUser(None, Some(passwordHash), _, None) =>
+                Future.successful(BadRequest(Error.toTopLevelJson(s"error with field /email : field missing")))
+              case _ =>
+                Logger.debug(s"Impossible to register ${user}")
+                Future.successful(BadRequest(Error.toTopLevelJson(s"You have to specified password or facebookToken to create an user")))
+            }
+          )
       }
+    }
   }
 
-  def createUserByEmail(user: NewUser): Future[Result] = {
+  def createUserByEmail(user: NewUser)(token: Token): Future[Result] = {
     val newUser = User.fromNewUser(user)
-    createUser(newUser)
+    createUser(newUser)(token)
   }
 
-  def createUserByFacebook(user: NewUser, facebookToken: String): Future[Result] = {
+  def createUserByFacebook(user: NewUser, facebookToken: String)(token: Token): Future[Result] = {
     retrieveFacebookUserId(facebookToken).flatMap{
       facebookUserId =>
         val newUser = User.fromNewUser(user, Some(facebookUserId))
-        createUser(newUser)
+        createUser(newUser)(token)
     }.recover {
       case exception: FacebookException if exception.exceptionType == "OAuthException" =>
         Unauthorized(Error.toTopLevelJson(Error("Invalid facebook access token")))
@@ -69,11 +75,13 @@ object Users extends Controller with APIJsonFormats {
     }
   }
 
-  def createUser(user: User): Future[Result] = {
-    User.create(user).map { lastError =>
+  def createUser(user: User)(token: Token): Future[Result] = {
+    User.create(user).flatMap{ lastError =>
       Logger.debug(s"Successfully inserted with LastError: $lastError")
-      val token = Token.newTokenForUser(user.id)
-      Created(Json.toJson(TopLevel(users=Some(user), tokens = Some(token))))
+      Token.updateToken(token,user.id).map(
+        token =>
+          Created(Json.toJson(TopLevel(users = Some(user), tokens=Some(token))))
+      )
     }.recover {
       case exception: DatabaseException if exception.code.contains(11000) && exception.getMessage().contains("emailUniqueIndex")=>
         Logger.debug("email already exist with database: "+exception.getMessage())
@@ -98,54 +106,6 @@ object Users extends Controller with APIJsonFormats {
       }
   }
 
-  def login = LoggingAction {
-      Action.async(BodyParsers.parse.tolerantJson) { request =>
-        val userResult = (request.body \ "users").validate[LoginUser]
-        userResult.fold(
-          validationErrors => {
-            Future.successful(BadRequest(Error.toTopLevelJson(validationErrors)))
-          },
-          loginUser => loginUser match {
-            case LoginUser(Some(email), Some(passwordHash), None, None) =>
-              loginByEmail(email, passwordHash)
-            case LoginUser(None, Some(passwordHash), Some(username), None) =>
-              loginByUsername(username, passwordHash)
-            case LoginUser(None, None, None, Some(facebookToken)) =>
-              loginByFacebook(facebookToken)
-            case _ =>
-              Future.successful(BadRequest(Error.toTopLevelJson(s"You can specified only username/passwordHash, email/passwordHash or facebookToken to login")))
-          }
-        )
-      }
-  }
-
-  def loginByEmail(email: String, loginPasswordHash: String): Future[Result] = User.findByEmail(email).map {
-    users => users match {
-      case User(Some(`email`), Some(passwordHash), id, _, _,_, _, _) :: Nil if Hash.bcrypt_compare(loginPasswordHash,passwordHash) =>
-        val token = Token.newTokenForUser(id)
-        Ok(Json.toJson(TopLevel(users = Some(users.head), tokens = Some(token) )))
-      case User(Some(`email`), None, _, _, Some(_), Some(_), _, _) :: Nil =>
-        Unauthorized(Error.toTopLevelJson(Error("User logged by facebook")))
-      case User(Some(`email`), _, _, _, _, _, _, _) :: Nil =>
-        Unauthorized(Error.toTopLevelJson(Error("Incorrect password")))
-      case _ =>
-        NotFound(Error.toTopLevelJson(Error("No user account for this email")))
-    }
-  }
-
-  def loginByUsername(username: String, loginPasswordHash: String): Future[Result] = User.findByUsername(username).map {
-    users => users match {
-      case User(_, Some(passwordHash), id, Some(`username`), _, _, _, _) :: Nil if Hash.bcrypt_compare(loginPasswordHash,passwordHash) =>
-        val token = Token.newTokenForUser(id)
-        Ok(Json.toJson(TopLevel(users = Some(users.head), tokens = Some(token) )))
-      case User(_, None, _, Some(`username`), Some(_), Some(_), _, _) :: Nil =>
-        Unauthorized(Error.toTopLevelJson(Error("User registered by facebook")))
-      case User(_, _, _, Some(`username`), _, _, _, _) :: Nil =>
-        Unauthorized(Error.toTopLevelJson(Error("Incorrect password")))
-      case _ =>
-        NotFound(Error.toTopLevelJson(Error("No user account for this username")))
-    }
-  }
 
   def retrieveFacebookUserId(facebookToken: String): Future[String] = {
     implicit val system = Akka.system
@@ -164,16 +124,52 @@ object Users extends Controller with APIJsonFormats {
     }
   }
 
-  def loginByFacebook(facebookToken: String): Future[Result] = {
-    retrieveFacebookUserId(facebookToken).flatMap{
+
+  def loginByEmail(email: String, loginPasswordHash: String)(token: Token): Future[Result] = User.findByEmail(email).flatMap {
+    users => users match {
+      case User(Some(`email`), Some(passwordHash), id, _, _,_, _, _) :: Nil if Hash.bcrypt_compare(loginPasswordHash,passwordHash) =>
+        Token.updateToken(token,id).map(
+          token =>
+            Ok(Json.toJson(TopLevel(users = Some(users.head), tokens= Some(token))))
+        )
+      case User(Some(`email`), None, _, _, Some(_), Some(_), _, _) :: Nil =>
+        Future.successful(Unauthorized(Error.toTopLevelJson(Error("User logged by facebook"))))
+      case User(Some(`email`), _, _, _, _, _, _, _) :: Nil =>
+        Future.successful(Unauthorized(Error.toTopLevelJson(Error("Incorrect password"))))
+      case _ =>
+        Future.successful(NotFound(Error.toTopLevelJson(Error("No user account for this email"))))
+    }
+  }
+
+  def loginByUsername(username: String, loginPasswordHash: String)(token: Token): Future[Result] = User.findByUsername(username).flatMap {
+    users => users match {
+      case User(_, Some(passwordHash), id, Some(`username`), _, _, _, _) :: Nil if Hash.bcrypt_compare(loginPasswordHash,passwordHash) =>
+        Token.updateToken(token,id).map(
+          token =>
+            Ok(Json.toJson(TopLevel(users = Some(users.head), tokens= Some(token))))
+        )
+      case User(_, None, _, Some(`username`), Some(_), Some(_), _, _) :: Nil =>
+        Future.successful(Unauthorized(Error.toTopLevelJson(Error("User registered by facebook"))))
+      case User(_, _, _, Some(`username`), _, _, _, _) :: Nil =>
+        Future.successful(Unauthorized(Error.toTopLevelJson(Error("Incorrect password"))))
+      case _ =>
+        Future.successful(NotFound(Error.toTopLevelJson(Error("No user account for this username"))))
+    }
+  }
+
+
+  def loginByFacebook(facebookToken: String)(token: Token): Future[Result] = {
+    Users.retrieveFacebookUserId(facebookToken).flatMap{
       facebookUserId =>
-        User.findByFacebookUserId(facebookUserId).map {
+        User.findByFacebookUserId(facebookUserId).flatMap {
           users => users match {
             case User(_, _, id, _, _, Some(`facebookUserId`), _, _) :: Nil =>
-              val token = Token.newTokenForUser(id)
-              Ok(Json.toJson(TopLevel(users = Some(users.head), tokens = Some(token))))
+              Token.updateToken(token,id).map(
+                token =>
+                  Ok(Json.toJson(TopLevel(users = Some(users.head), tokens= Some(token))))
+              )
             case _ =>
-              NotFound(Error.toTopLevelJson(Error("No user account for the facebookUserId associated to this facebookToken")))
+              Future.successful(NotFound(Error.toTopLevelJson(Error("No user account for the facebookUserId associated to this facebookToken"))))
           }
         }
     }.recover {

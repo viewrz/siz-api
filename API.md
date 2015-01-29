@@ -1,10 +1,29 @@
 API Specs
 =========
 
+# Create a token
+```
+POST /tokens
+
+{}
+```
+
+## Results
+```
+{
+   "tokens" : {
+      "href" : "/tokens/J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje",
+      "id" : "J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje"
+   }
+}
+```
+
+
 # Create an user
 ## Request
 ```
 POST /users
+X-Access-Token: J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
 
 {
   "users": {
@@ -62,10 +81,34 @@ Content-Type: application/vnd.api+json
 }
 ```
 
+```
+HTTP/1.1 401 Unauthorized
+Content-Type: application/vnd.api+json
+
+{
+   "errors": {
+      "title":"Unknown token J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje"
+   }
+}
+```
+
+```
+HTTP/1.1 400 Bad Request
+Content-Type: application/vnd.api+json
+
+{
+   "errors" : {
+      "title" : "An user is already logged on this token, discard this token and create a new one."
+   }
+}
+
+```
+
 # Create an user with facebook
 ## Request
 ```
 POST /users
+X-Access-Token: J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
 
 {
   "users": {
@@ -125,7 +168,8 @@ Content-Type: application/vnd.api+json
 # Login by email
 ## Request
 ```
-POST /tokens
+PUT /tokens/J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
+X-Access-Token: J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
 
 {
   "users": {
@@ -180,7 +224,8 @@ Content-Type: application/vnd.api+json
 # Login by username
 ## Request
 ```
-POST /tokens
+PUT /tokens/J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
+X-Access-Token: J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
 
 {
   "users": {
@@ -235,7 +280,8 @@ Content-Type: application/vnd.api+json
 # Login by facebook
 ## Request
 ```
-POST /tokens
+PUT /tokens/J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
+X-Access-Token: J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
 
 {
   "users": {
@@ -283,6 +329,7 @@ Content-Type: application/vnd.api+json
 
 ```
 GET /emails/paul@example.com
+X-Access-Token: J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
 ```
 
 ## Results
