@@ -10,7 +10,8 @@ object Application extends Controller with APIJsonFormats {
   def index = Action {
       val services = Map( "users"-> "/users",
                           "emails"-> "/emails",
-                          "tokens"-> "/tokens"
+                          "tokens"-> "/tokens",
+                          "stories"-> "/stories"
       )
       Ok(Json.toJson(TopLevel(links=Some(services))))
     }
