@@ -20,13 +20,13 @@ class UsersSpec extends Specification {
       route(FakeRequest(GET, "/users")) must beNone
     }
 
-    "create a email user" in new WithApplication{
+    "create a email user v1.0" in new WithApplication{
       val jsonBody: JsValue = JsObject(
         Seq("users" ->
           JsObject(Seq(
-            "email" -> JsString("johndoe@siz.io"),
+            "email" -> JsString("johndoe-v1.0@siz.io"),
             "password" -> JsString("6b3a55e0261b0304143f805a24924d0c1c44524821305f31d9277843b8a10f4e"),
-            "username" -> JsString("johndoe"))
+            "username" -> JsString("johndoev1.0"))
           )
         )
       )
@@ -36,6 +36,26 @@ class UsersSpec extends Specification {
       contentType(createUser) must beSome.which(_ == "application/json")
       contentAsString(createUser) must contain ("""email""")
       contentAsString(createUser) must not contain ("""password""")
+    }
+
+    "create a email user v1.1" in new WithApplication{
+      val jsonBody: JsValue = JsObject(
+        Seq("users" ->
+          JsObject(Seq(
+            "email" -> JsString("johndoe-v1.1@siz.io"),
+            "password" -> JsString("6b3a55e0261b0304143f805a24924d0c1c44524821305f31d9277843b8a10f4e"),
+            "username" -> JsString("johndoev1.1"))
+          )
+        )
+      )
+      val createdToken = contentAsJson(route(FakeRequest(POST, "/tokens").withJsonBody(JsObject(Seq()))).get)
+
+      val createdUser = route(FakeRequest(POST, "/users").withHeaders(("X-Access-Token",(createdToken \ "tokens" \ "id").as[String])).withJsonBody(jsonBody)).get
+
+      status(createdUser) must equalTo(CREATED)
+      contentType(createdUser) must beSome.which(_ == "application/json")
+      contentAsString(createdUser) must contain ("""email""")
+      contentAsString(createdUser) must not contain ("""password""")
     }
   }
 }

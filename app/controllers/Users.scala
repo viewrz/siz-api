@@ -1,11 +1,10 @@
 package controllers
 
-import actions.{TokenRequest, LoggingAction, TokenCheckAction}
+import actions.{LoggingAction, TokenCheckAction}
 
 import akka.io.IO
 import akka.util.Timeout
 import akka.pattern.ask
-import controllers.Tokens._
 import play.api.libs.concurrent.Akka
 import spray.can.Http
 import spracebook.SprayClientFacebookGraphApi
@@ -14,7 +13,7 @@ import spracebook.Exceptions._
 import formats.APIJsonFormats
 import models._
 import play.api._
-import play.api.libs.json.{JsError, Json}
+import play.api.libs.json.{JsValue, JsError, Json}
 import play.api.mvc._
 import play.api.Play.current
 
@@ -28,31 +27,58 @@ import scala.language.postfixOps
 
 object Users extends Controller with APIJsonFormats {
 
+  // V1.0 compatibility
+  def createDispatcher = LoggingAction {
+    Action.async(BodyParsers.parse.tolerantJson) { request =>
+      request.headers.get(access_token_header) match {
+        case None =>
+          Token.newToken.flatMap {
+            token =>
+              createUser(token, request.body)
+          }
+        case Some(access_token) =>
+          Token.findById(access_token).flatMap {
+            case token :: Nil if token.id == access_token =>
+              createUser(token, request.body)
+            case _ =>
+              Future.successful(Unauthorized(Error.toTopLevelJson(Error(s"Unknown token $access_token"))))
+          }
+      }
+    }
+  }
+
   def create = LoggingAction{
     TokenCheckAction.async(BodyParsers.parse.tolerantJson) { request =>
       request.token.userId match {
         case Some(_) =>
           Future.successful(BadRequest(Error.toTopLevelJson("An user is already logged on this token, discard this token and create a new one.")))
         case None =>
-          val userResult = (request.body \ "users").validate[NewUser]
-          userResult.fold(
-            validationErrors => {
-              Future.successful(BadRequest(Error.toTopLevelJson(validationErrors)))
-            },
-            user => user match {
-              case NewUser(Some(email), Some(passwordHash), _, None) =>
-                createUserByEmail(user)(request.token)
-              case NewUser(_, None, _, Some(facebookToken)) =>
-                createUserByFacebook(user, facebookToken)(request.token)
-              case NewUser(None, Some(passwordHash), _, None) =>
-                Future.successful(BadRequest(Error.toTopLevelJson(s"error with field /email : field missing")))
-              case _ =>
-                Logger.debug(s"Impossible to register ${user}")
-                Future.successful(BadRequest(Error.toTopLevelJson(s"You have to specified password or facebookToken to create an user")))
-            }
-          )
+          createUser(request.token, (request.body \ "users"))
       }
     }
+  }
+
+  def createUser(token: Token, body: JsValue): Future[Result] = token.userId match {
+    case Some(_) =>
+      Future.successful(BadRequest(Error.toTopLevelJson("An user is already logged on this token, discard this token and create a new one.")))
+    case None =>
+      val userResult = (body \ "users").validate[NewUser]
+      userResult.fold(
+        validationErrors => {
+          Future.successful(BadRequest(Error.toTopLevelJson(validationErrors)))
+        },
+        user => user match {
+          case NewUser(Some(email), Some(passwordHash), _, None) =>
+            createUserByEmail(user)(token)
+          case NewUser(_, None, _, Some(facebookToken)) =>
+            createUserByFacebook(user, facebookToken)(token)
+          case NewUser(None, Some(passwordHash), _, None) =>
+            Future.successful(BadRequest(Error.toTopLevelJson(s"error with field /email : field missing")))
+          case _ =>
+            Logger.debug(s"Impossible to register ${user}")
+            Future.successful(BadRequest(Error.toTopLevelJson(s"You have to specified password or facebookToken to create an user")))
+        }
+      )
   }
 
   def createUserByEmail(user: NewUser)(token: Token): Future[Result] = {
