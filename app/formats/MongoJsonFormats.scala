@@ -17,16 +17,16 @@ trait MongoJsonFormats extends CommonJsonFormats {
     w.transform( js => js.as[JsObject] - "id"  ++ Json.obj("_id" -> Json.obj("$oid" -> js \ "id")) )
   }
 
-  def mongoReadsString[T](r: Reads[T]): Reads[T] = {
+  def mongoReadsStringId[T](r: Reads[T]): Reads[T] = {
     __.json.update((__ \ 'id).json.copyFrom((__ \ '_id).json.pick[JsString] )) andThen r
   }
 
-  def mongoWritesString[T](w : Writes[T]): Writes[T] = {
-    w.transform( js => js.as[JsObject] - "id"  ++ Json.obj("_id" -> js \ "id")) //Json.obj("$oid" -> js \ "id")) )
+  def mongoWritesStringId[T](w : Writes[T]): Writes[T] = {
+    w.transform( js => js.as[JsObject] - "id"  ++ Json.obj("_id" -> js \ "id"))
   }
 
-  implicit val tokenRead = mongoReadsString[Token](Json.reads[Token])
-  implicit val tokenWrite = mongoWritesString[Token](Json.writes[Token])
+  implicit val tokenRead = mongoReadsStringId[Token](Json.reads[Token])
+  implicit val tokenWrite = mongoWritesStringId[Token](Json.writes[Token])
   implicit val userRead = mongoReadsObjectId[User](Json.reads[User])
   implicit val userWrite = mongoWritesObjectId[User](Json.writes[User])
 }
