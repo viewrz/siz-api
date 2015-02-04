@@ -5,4 +5,3 @@ scala:
    - 2.11.4
 services:
   - mongodb
-sbt_args: -Dmongodb.uri="mongodb://localhost:27017/siz"
