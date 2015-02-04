@@ -1,7 +1,10 @@
 language: scala
 jdk:
-   - openjdk7
+- openjdk7
 scala:
-   - 2.11.4
+- 2.11.4
 services:
-  - mongodb
+- mongodb
+notifications:
+  slack:
+    secure: Qy8LZF5jvJaFDovRomGZbs427VlZvlragAwLIi1340QwiCteYJJv9dQKOZ/iW+TinB6j7teaHsk3h2TJOC73G6BEJ9VSlfEbg+qxpLqh255hZl9rnDWQdm6kQMyqgxVzCCfxcWTjbvMg5rhLkPMmagHzR3zqJw13Yf2JpvLv+k4=
