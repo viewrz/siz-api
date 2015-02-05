@@ -1,7 +1,6 @@
 package controllers
 
 import actions.{TokenCheckAction, LoggingAction}
-import controllers.Users._
 
 import formats.APIJsonFormats
 import models._

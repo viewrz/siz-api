@@ -1,7 +1,7 @@
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
-import play.api.libs.json.{JsUndefined, JsObject}
+import play.api.libs.json.JsObject
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, WithApplication}
 
@@ -9,7 +9,6 @@ import play.api.test.{FakeRequest, WithApplication}
 class TokensSpec extends Specification {
 
   "Tokens" should {
-
     "create a token" in new WithApplication {
       val createdToken = route(FakeRequest(POST, "/tokens").withJsonBody(JsObject(Seq()))).get
       status(createdToken) must equalTo(CREATED)
