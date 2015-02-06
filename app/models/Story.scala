@@ -8,8 +8,8 @@ import utils.Hash
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
-case class OldBoxe(height: Int, width: Int, url: String)
-case class OldStory(boxes: Option[List[OldBoxe]],
+case class OldBox(height: Int, width: Int, url: String)
+case class OldStory(boxes: Option[List[OldBox]],
                     date: Date,
                     duration: Double,
                     gifUrl: Option[String],
@@ -29,17 +29,17 @@ case class OldStory(boxes: Option[List[OldBoxe]],
                     voteCount: Int) extends Document
 
 case class VideoFormat(href: String, _type: String)
-case class Boxe(height: Int, width: Int, formats: List[VideoFormat])
+case class Box(height: Int, width: Int, formats: List[VideoFormat])
 case class Image(href: String)
 
-object Boxe {
-  def oldBoxesToBoxes(oldBoxes: List[OldBoxe], s: OldStory): List[Boxe] = s.gifUrls match {
+object Box {
+  def oldBoxesToBoxes(oldBoxes: List[OldBox], s: OldStory): List[Box] = s.gifUrls match {
     case None =>
       oldBoxes.map(oldBoxeToBoxe)
     case Some(gifUrls) =>
-      (oldBoxes zip gifUrls) map { t => Boxe(t._1.height,t._1.width,List(VideoFormat(t._1.url,"mp4"),VideoFormat(t._2,"gif")) ) }
+      (oldBoxes zip gifUrls) map { t => Box(t._1.height,t._1.width,List(VideoFormat(t._1.url,"mp4"),VideoFormat(t._2,"gif")) ) }
   }
-  def oldBoxeToBoxe(b: OldBoxe) = Boxe(b.height,b.width,List(VideoFormat(b.url,"mp4")))
+  def oldBoxeToBoxe(b: OldBox) = Box(b.height,b.width,List(VideoFormat(b.url,"mp4")))
 }
 
 case class Source(id: String,
@@ -48,13 +48,14 @@ case class Source(id: String,
 /*,
                   start: Option[Long],
                   stop: Option[Long])*/
-case class Story(boxes: List[Boxe],
+case class Story(boxes: List[Box],
                  creationDate: Date,
                  id: String,
                  slug: String,
                  source: Source,
                  picture: Image,
-                 title: String)
+                 title: String,
+                 tags: List[String])
 
 object OldStory extends RethinkModel[OldStory]("video"){
   def newIdToOldId(newId: String) = newId.substring(0,13).toLong
@@ -66,7 +67,7 @@ object OldStory extends RethinkModel[OldStory]("video"){
 object Story {
   def oldIdToNewId(oldId: String, date: Date) = date.getTime.toString+Hash.md5(oldId).substring(0,11)
   def oldStoriesToStories(oldStories: Seq[OldStory]): Seq[Story] = oldStories.map(Story.oldStoryToStory)
-  def oldStoryToStory(s: OldStory) = Story(Boxe.oldBoxesToBoxes(s.boxes.get, s), s.date, oldIdToNewId(s.id,s.date),s.id, Source.oldStoryToSource(s), Image(s.pictureUrl), s.title)
+  def oldStoryToStory(s: OldStory) = Story(Box.oldBoxesToBoxes(s.boxes.get, s), s.date, oldIdToNewId(s.id,s.date),s.id, Source.oldStoryToSource(s), Image(s.pictureUrl), s.title, s.shortlist :: Shortlist.get(s.shortlist).map(List(_)).getOrElse(Nil))
 }
 
 object Source {
