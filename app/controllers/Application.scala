@@ -14,8 +14,7 @@ object Application extends Controller with APIJsonFormats {
       val services = Map("users" -> s"$root/users",
         "emails" -> s"$root/emails",
         "tokens" -> s"$root/tokens",
-        "stories" -> s"$root/stories",
-        "href" -> root
+        "stories" -> s"$root/stories"
       )
       Ok(Json.toJson(TopLevel(links = Some(services))))
     }
