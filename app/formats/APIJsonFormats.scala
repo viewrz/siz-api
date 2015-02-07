@@ -19,22 +19,23 @@ trait APIJsonFormats extends CommonJsonFormats {
 
   implicit val userWrite: Writes[User] = addHref("users",Json.writes[User].transform( js => js.as[JsObject] - "passwordHash" - "facebookToken"))
 
-  private val sha256Regex = "[0-9a-z]{64}".r
-  private val emailRegex = """^(?!\.)("([^"\r\\]|\\["\r\\])*"|([-a-zA-Z0-9!#$%&'*+/=?^_`{|}~]|(?<!\.)\.)*)(?<!\.)@[a-zA-Z0-9][\w\.-]*[a-zA-Z0-9]\.[a-zA-Z][a-zA-Z\.]*[a-zA-Z]$""".r
-  private val usernameRegex = "[0-9a-zA-Z.]{2,20}".r
-  private val facebookTokenRegex = "[^;\t\n]{1,1024}".r
+  val Sha256Regex = "[0-9a-z]{64}".r
+  val EmailRegex = """^(?!\.)("([^"\r\\]|\\["\r\\])*"|([-a-zA-Z0-9!#$%&'*+/=?^_`{|}~]|(?<!\.)\.)*)(?<!\.)@[a-zA-Z0-9][\w\.-]*[a-zA-Z0-9]\.[a-zA-Z][a-zA-Z\.]*[a-zA-Z]$""".r
+  val UsernameRegex = "[0-9a-zA-Z.]{2,20}".r
+  val FacebookTokenRegex = "[^;\t\n]{1,1024}".r
+
   implicit val newUserRead: Reads[NewUser]  = (
-    (__ \ "email").readNullable[String](pattern(emailRegex, "error.email")) and
-    (__ \ "password").readNullable[String](pattern(sha256Regex, "error.sha256")) and
-    (__ \ "username").readNullable[String](pattern(usernameRegex, "error.username")) and
-    (__ \ "facebookToken").readNullable[String](pattern(facebookTokenRegex, "error.facebookToken"))
+    (__ \ "email").readNullable[String](pattern(EmailRegex, "error.email")) and
+    (__ \ "password").readNullable[String](pattern(Sha256Regex, "error.sha256")) and
+    (__ \ "username").readNullable[String](pattern(UsernameRegex, "error.username")) and
+    (__ \ "facebookToken").readNullable[String](pattern(FacebookTokenRegex, "error.facebookToken"))
     )(NewUser.apply _)
 
   implicit val loginUserRead: Reads[LoginUser]  = (
-    (__ \ "email").readNullable[String](pattern(emailRegex, "error.email")) and
-    (__ \ "password").readNullable[String](pattern(sha256Regex, "error.sha256")) and
-    (__ \ "username").readNullable[String](pattern(usernameRegex, "error.username")) and
-    (__ \ "facebookToken").readNullable[String](pattern(facebookTokenRegex, "error.facebookToken"))
+    (__ \ "email").readNullable[String](pattern(EmailRegex, "error.email")) and
+    (__ \ "password").readNullable[String](pattern(Sha256Regex, "error.sha256")) and
+    (__ \ "username").readNullable[String](pattern(UsernameRegex, "error.username")) and
+    (__ \ "facebookToken").readNullable[String](pattern(FacebookTokenRegex, "error.facebookToken"))
   )(LoginUser.apply _)
 
   implicit val errorWrite = Json.writes[Error]
@@ -51,7 +52,7 @@ trait APIJsonFormats extends CommonJsonFormats {
           js.as[JsObject]
       }
   }
-  implicit val boxesWrite = Json.writes[Boxe]
+  implicit val boxesWrite = Json.writes[Box]
   implicit val storyWrite = addHref("stories",Json.writes[Story])
 
   implicit val topLevelWrite = Json.writes[TopLevel]
