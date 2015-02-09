@@ -11,3 +11,4 @@ PUT     /tokens/:id                        controllers.Tokens.updateDispatcher(i
 GET     /emails/:email                     controllers.Users.checkEmail(email)
 GET     /stories                           controllers.Stories.dispatcher(limit: Int ?= 20, orderBy: String ?= "date", slug: Option[String] ?= None)
 GET     /stories/$id<[0-9a-z]{24}>         controllers.Stories.getById(id)
+POST    /events                            controllers.Events.create

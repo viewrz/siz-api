@@ -6,13 +6,13 @@ import formats.APIJsonFormats
 import models._
 import play.api.mvc._
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
-import scala.util.matching.Regex
 
 import scala.concurrent.Future
 
 object Stories extends Controller with APIJsonFormats {
+
   def dispatcher(limit: Int, orderBy: String, slug: Option[String]) = LoggingAction {
     TokenCheckAction.async { request =>
       slug match {
@@ -34,9 +34,8 @@ object Stories extends Controller with APIJsonFormats {
 
   def getById(id: String) = LoggingAction {
     TokenCheckAction.async { request =>
-      val RegexId = "[0-9]{13}[0-9a-z]{11}".r
       id match {
-        case RegexId() =>
+        case StoryIdRegex() =>
           OldStory.getById(id).map {
             case None =>
               NotFound(Error.toTopLevelJson(Error("No story for this id %s and %s creationDate".format(id,OldStory.newIdToOldId(id)))))
@@ -53,4 +52,5 @@ object Stories extends Controller with APIJsonFormats {
       result =>
        Ok(Json.toJson(TopLevel(stories = Some(Left(Story.oldStoryToStory(result))))))
     }
+
 }

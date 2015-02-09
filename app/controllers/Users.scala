@@ -20,7 +20,7 @@ import play.api.Play.current
 import reactivemongo.core.errors.DatabaseException
 import utils.Hash
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.duration._
 import scala.concurrent.Future
 import scala.language.postfixOps

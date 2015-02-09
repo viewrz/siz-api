@@ -1,6 +1,6 @@
 package formats
 
-import models.{Token, User}
+import models._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
@@ -29,4 +29,8 @@ trait MongoJsonFormats extends CommonJsonFormats {
   implicit val tokenWrite = mongoWritesStringId[Token](Json.writes[Token])
   implicit val userRead = mongoReadsObjectId[User](Json.reads[User])
   implicit val userWrite = mongoWritesObjectId[User](Json.writes[User])
+  implicit val eventRead = Json.reads[Event]
+  implicit val eventWrite = Json.writes[Event]
+  implicit val viewerProfileRead = mongoReadsObjectId[ViewerProfile](Json.reads[ViewerProfile])
+  implicit val viewerProfileWrite = mongoWritesObjectId[ViewerProfile](Json.writes[ViewerProfile])
 }

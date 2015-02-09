@@ -5,8 +5,8 @@ import java.util.Date
 import com.rethinkscala.Document
 import com.rethinkscala.Implicits.Async._
 import utils.Hash
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 
 case class OldBox(height: Int, width: Int, url: String)
 case class OldStory(boxes: Option[List[OldBox]],
@@ -35,11 +35,11 @@ case class Image(href: String)
 object Box {
   def oldBoxesToBoxes(oldBoxes: List[OldBox], s: OldStory): List[Box] = s.gifUrls match {
     case None =>
-      oldBoxes.map(oldBoxeToBoxe)
+      oldBoxes.map(oldBoxToBox)
     case Some(gifUrls) =>
       (oldBoxes zip gifUrls) map { t => Box(t._1.height,t._1.width,List(VideoFormat(t._1.url,"mp4"),VideoFormat(t._2,"gif")) ) }
   }
-  def oldBoxeToBoxe(b: OldBox) = Box(b.height,b.width,List(VideoFormat(b.url,"mp4")))
+  def oldBoxToBox(b: OldBox) = Box(b.height,b.width,List(VideoFormat(b.url,"mp4")))
 }
 
 case class Source(id: String,
