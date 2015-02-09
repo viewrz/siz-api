@@ -8,13 +8,12 @@ import play.api.libs.json._
 import play.api.mvc.{BodyParsers, Action, Controller}
 
 import scala.concurrent.Future
-
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 object Tokens extends Controller with APIJsonFormats {
 
   // V1.0 compatibility
-  def dispatcher = LoggingAction {
+  def createDispatcher = LoggingAction {
     Action.async(BodyParsers.parse.tolerantJson) { request =>
       (request.body \ "users") match {
         case _: JsUndefined =>
@@ -30,11 +29,12 @@ object Tokens extends Controller with APIJsonFormats {
     }
   }
 
+  /* v1.1 only
   def createDispatcher = LoggingAction {
     Action.async(BodyParsers.parse.tolerantJson) { request =>
       createToken
     }
-  }
+  }*/
 
   def createToken = Token.newToken.map {
     token =>

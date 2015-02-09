@@ -6,7 +6,7 @@
 GET     /                                  controllers.Application.index
 POST    /users                             controllers.Users.createDispatcher
 GET     /users/:id                         controllers.Users.get(id)
-POST    /tokens                            controllers.Tokens.dispatcher
+POST    /tokens                            controllers.Tokens.createDispatcher
 PUT     /tokens/:id                        controllers.Tokens.updateDispatcher(id)
 GET     /emails/:email                     controllers.Users.checkEmail(email)
 GET     /stories                           controllers.Stories.dispatcher(limit: Int ?= 20, orderBy: String ?= "date", slug: Option[String] ?= None)
