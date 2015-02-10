@@ -59,7 +59,10 @@ case class Story(boxes: List[Box],
 
 object OldStory extends RethinkModel[OldStory]("video"){
   def newIdToOldId(newId: String) = newId.substring(0,13).toLong
-  def getAll(limit: Int, orderBy: String) = table.filter(f=> f.hasFields("boxes")).orderBy(orderBy.desc).limit(limit).as[Seq[OldStory]]
+  def find(limit: Int, orderBy: String, exceptStoryIds: List[String] = List()) = {
+    val exceptDates = exceptStoryIds.map(OldStory.newIdToOldId)
+    table.filter(f => f.hasFields("boxes") and ~(Expr(exceptDates).contains(date => f \ "date" === date))).orderBy(orderBy.desc).limit(limit).as[Seq[OldStory]]
+  }
   def getBySlug(slug: String) = table.get(slug).as[OldStory]
   def getById(id: String) = table.filter(Map("date" -> newIdToOldId(id))).as[Seq[OldStory]].map(_.headOption)
 }

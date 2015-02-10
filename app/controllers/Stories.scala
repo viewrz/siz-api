@@ -17,18 +17,21 @@ object Stories extends Controller with APIJsonFormats {
     TokenCheckAction.async { request =>
       slug match {
         case None =>
-          getAll(limit, orderBy)
+          find(limit, orderBy, request.token.viewerProfileId)
         case Some(slug) =>
           getBySlug(slug)
       }
     }
   }
 
-  def getAll(limit: Int, orderBy: String) = {
-      val futureStory = OldStory.getAll(limit,orderBy)
-      futureStory.map{
-        results =>
-          Ok(Json.toJson(TopLevel(stories = Some(Right(Story.oldStoriesToStories(results))))))
+  def find(limit: Int, orderBy: String, viewerProfileId: String) = {
+      ViewerProfile.findById(viewerProfileId).flatMap {
+        viewerProfile =>
+          val futureStory = OldStory.find(limit, orderBy,viewerProfile.viewedStoryIds)
+          futureStory.map {
+            results =>
+              Ok(Json.toJson(TopLevel(stories = Some(Right(Story.oldStoriesToStories(results))))))
+          }
       }
   }
 
