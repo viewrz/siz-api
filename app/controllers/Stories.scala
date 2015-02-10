@@ -25,9 +25,11 @@ object Stories extends Controller with APIJsonFormats {
   }
 
   def find(limit: Int, orderBy: String, viewerProfileId: String) = {
+    val removeTagsWithWeight = -3
       ViewerProfile.findById(viewerProfileId).flatMap {
         viewerProfile =>
-          val futureStory = OldStory.find(limit, orderBy,viewerProfile.viewedStoryIds)
+          val filtredTags = viewerProfile.tagsFilterBy(_._2 <= removeTagsWithWeight)
+          val futureStory = OldStory.find(limit, orderBy,viewerProfile.viewedStoryIds,filtredTags)
           futureStory.map {
             results =>
               Ok(Json.toJson(TopLevel(stories = Some(Right(Story.oldStoriesToStories(results))))))

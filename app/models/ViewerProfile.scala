@@ -8,7 +8,7 @@ import scala.concurrent.Future
 
 case class ViewerProfile(id: String, viewedStoryIds: List[String] = List(), tagsWeights: Map[String,Int] = Map())
 {
-  def tagsFilterBy(filter: ((String,Int)) => (Boolean)) = this.tagsWeights.filter(filter)
+  def tagsFilterBy(filter: ((String,Int)) => (Boolean)) = this.tagsWeights.filter(filter).map(_._1).toList
 }
 
 object ViewerProfile extends MongoModel("viewerprofile")

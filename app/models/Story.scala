@@ -4,6 +4,7 @@ import java.util.Date
 
 import com.rethinkscala.Document
 import com.rethinkscala.Implicits.Async._
+import com.rethinkscala.ast.Random
 import utils.Hash
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -58,10 +59,18 @@ case class Story(boxes: List[Box],
                  tags: List[String])
 
 object OldStory extends RethinkModel[OldStory]("video"){
+  val percentWithoutTagsFilter = 20
+
   def newIdToOldId(newId: String) = newId.substring(0,13).toLong
-  def find(limit: Int, orderBy: String, exceptStoryIds: List[String] = List()) = {
+  def find(limit: Int, orderBy: String, exceptStoryIds: List[String] = List(), exceptTags: List[String] = List()) = {
     val exceptDates = exceptStoryIds.map(OldStory.newIdToOldId)
-    table.filter(f => f.hasFields("boxes") and ~(Expr(exceptDates).contains(date => f \ "date" === date))).orderBy(orderBy.desc).limit(limit).as[Seq[OldStory]]
+    table.filter(f => f.hasFields("boxes") and
+                      ~(Expr(exceptDates).contains(date => f \ "date" === date))
+                      and (~(Expr(exceptTags).contains(tag => f \ "shortlist" === tag)))
+                )
+         .orderBy(orderBy.desc)
+         .limit(limit)
+        .as[Seq[OldStory]]
   }
   def getBySlug(slug: String) = table.get(slug).as[OldStory]
   def getById(id: String) = table.filter(Map("date" -> newIdToOldId(id))).as[Seq[OldStory]].map(_.headOption)
