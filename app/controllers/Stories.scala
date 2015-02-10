@@ -17,19 +17,24 @@ object Stories extends Controller with APIJsonFormats {
     TokenCheckAction.async { request =>
       slug match {
         case None =>
-          find(limit, orderBy, request.token.viewerProfileId)
+          find(limit, orderBy, request.token.viewerProfileId, request.token.userId != None)
         case Some(slug) =>
           getBySlug(slug)
       }
     }
   }
 
-  def find(limit: Int, orderBy: String, viewerProfileId: String) = {
+  def find(limit: Int, orderBy: String, viewerProfileId: String, tagsFilter: Boolean) = {
     val removeTagsWithWeight = -3
       ViewerProfile.findById(viewerProfileId).flatMap {
         viewerProfile =>
-          val filtredTags = viewerProfile.tagsFilterBy(_._2 <= removeTagsWithWeight)
-          val futureStory = OldStory.find(limit, orderBy,viewerProfile.viewedStoryIds,filtredTags)
+          val filteredTags = tagsFilter match {
+            case true =>
+              viewerProfile.tagsFilterBy(_._2 <= removeTagsWithWeight)
+            case false =>
+              List()
+          }
+          val futureStory = OldStory.find(limit, orderBy,viewerProfile.viewedStoryIds,filteredTags)
           futureStory.map {
             results =>
               Ok(Json.toJson(TopLevel(stories = Some(Right(Story.oldStoriesToStories(results))))))
