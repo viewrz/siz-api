@@ -82,14 +82,14 @@ object Users extends Controller with APIJsonFormats {
   }
 
   def createUserByEmail(user: NewUser)(token: Token): Future[Result] = {
-    val newUser = User.fromNewUser(user)
+    val newUser = User.fromNewUser(user, userId = Some(token.viewerProfileId))
     createUser(newUser)(token)
   }
 
   def createUserByFacebook(user: NewUser, facebookToken: String)(token: Token): Future[Result] = {
     retrieveFacebookUserId(facebookToken).flatMap{
       facebookUserId =>
-        val newUser = User.fromNewUser(user, Some(facebookUserId))
+        val newUser = User.fromNewUser(user, Some(facebookUserId), Some(token.viewerProfileId))
         createUser(newUser)(token)
     }.recover {
       case exception: FacebookException if exception.exceptionType == "OAuthException" =>
