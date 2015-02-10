@@ -1,7 +1,7 @@
 import play.api._
 import play.api.mvc._
 import play.api.mvc.Results._
-import models.{User, TopLevel, Error}
+import models._
 
 import scala.concurrent.Future
 
@@ -9,6 +9,7 @@ object Global extends GlobalSettings {
 
   def ensureMongoIndexes = {
     User.ensureIndexes
+    Event.ensureIndexes
   }
 
   override def onStart(app: Application): Unit = {

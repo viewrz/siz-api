@@ -41,12 +41,12 @@ trait APIJsonFormats extends CommonJsonFormats {
 
   def isValidTagList(tags: List[String]) = tags.forall(TagsRegex.pattern.matcher(_).matches())
 
-  implicit val eventRead: Reads[Event]  = (
+  implicit val eventRead: Reads[NewEvent]  = (
       (__ \ "storyId").read[String](pattern(StoryIdRegex, "error.story.id")) and
       (__ \ "type").read[String](likeNopeValidate) and
       (__ \ "tags").read[List[String]](minLength[List[String]](1) keepAnd filter(ValidationError("error.tag"))(isValidTagList)) and
       (__ \ "date").readNullable[Date].map(_.getOrElse(new Date()))
-    )(Event.apply _)
+    )(NewEvent.apply _)
 
   implicit val loginUserRead: Reads[LoginUser]  = (
     (__ \ "email").readNullable[String](pattern(EmailRegex, "error.email")) and

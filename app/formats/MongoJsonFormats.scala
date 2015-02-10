@@ -29,8 +29,8 @@ trait MongoJsonFormats extends CommonJsonFormats {
   implicit val tokenWrite = mongoWritesStringId[Token](Json.writes[Token])
   implicit val userRead = mongoReadsObjectId[User](Json.reads[User])
   implicit val userWrite = mongoWritesObjectId[User](Json.writes[User])
-  implicit val eventRead = Json.reads[Event]
-  implicit val eventWrite = Json.writes[Event]
+  implicit val eventRead = mongoReadsObjectId[Event](Json.reads[Event])
+  implicit val eventWrite = mongoWritesObjectId[Event](Json.writes[Event])
   implicit val viewerProfileRead = mongoReadsObjectId[ViewerProfile](Json.reads[ViewerProfile])
   implicit val viewerProfileWrite = mongoWritesObjectId[ViewerProfile](Json.writes[ViewerProfile])
 }
