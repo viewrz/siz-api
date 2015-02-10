@@ -29,7 +29,7 @@ class ApplicationSpec extends Specification {
 
       val home = route(FakeRequest(GET, "/").withHeaders(("X-Access-Token",(createdToken \ "tokens" \ "id").as[String]))).get
 
-      status(home) must equalTo(UNAUTHORIZED)
+      status(home) must equalTo(OK)
       contentType(home) must beSome.which(_ == "application/json")
       contentAsString(home) must contain("""links""")
     }
