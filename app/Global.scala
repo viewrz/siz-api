@@ -1,3 +1,4 @@
+import filters.CORSFilter
 import play.api._
 import play.api.mvc._
 import play.api.mvc.Results._
@@ -5,7 +6,7 @@ import models._
 
 import scala.concurrent.Future
 
-object Global extends GlobalSettings {
+object Global extends WithFilters(CORSFilter) with GlobalSettings {
 
   def ensureMongoIndexes = {
     User.ensureIndexes
