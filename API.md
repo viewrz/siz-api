@@ -398,3 +398,239 @@ Content-Type: application/vnd.api+json
    }
 }
 ```
+
+# Retrieve stories
+## Request
+```
+GET /stories
+X-Access-Token: fuEyvqImw2xbywewZAUHkFMo8xJO7eSOAOjkaRRSTTfzRTqdblN65Mx7O2JhmzVc
+```
+
+## Results
+```
+HTTP/1.1 200 OK
+Content-Type: application/vnd.api+json
+
+{
+   "stories" : [
+      {
+         "picture" : {
+            "href" : "http://img.youtube.com/vi/SE5Ip60_HJk/0.jpg"
+         },
+         "boxes" : [
+            {
+               "width" : 350,
+               "height" : 196,
+               "formats" : [
+                  {
+                     "href" : "http://static.siz.io/sequences/788798Y1112d.mp4",
+                     "type" : "mp4"
+                  }
+               ]
+            },
+            {
+               "width" : 350,
+               "height" : 196,
+               "formats" : [
+                  {
+                     "type" : "mp4",
+                     "href" : "http://static.siz.io/sequences/788798Y1112d.mp4"
+                  }
+               ]
+            },
+            {
+               "height" : 196,
+               "formats" : [
+                  {
+                     "href" : "http://static.siz.io/sequences/788798Y1112d.mp4",
+                     "type" : "mp4"
+                  }
+               ],
+               "width" : 350
+            },
+            {
+               "width" : 350,
+               "height" : 196,
+               "formats" : [
+                  {
+                     "href" : "http://static.siz.io/sequences/788798Y1112d.mp4",
+                     "type" : "mp4"
+                  }
+               ]
+            }
+         ],
+         "id" : "14217625935409c9a46d40cc",
+         "tags" : [
+            "meaningful-videos",
+            "news"
+         ],
+         "creationDate" : 1421762593540,
+         "slug" : "the-stand-up-kid",
+         "source" : {
+            "id" : "SE5Ip60_HJk",
+            "duration" : 187000,
+            "type" : "youtube"
+         },
+         "title" : "The stand up kid",
+         "href" : "/stories/14217625935409c9a46d40cc"
+      }
+   ]
+}
+```
+
+
+# Retrieve a stories
+## Request
+```
+GET /stories/14217625935409c9a46d40cc
+X-Access-Token: fuEyvqImw2xbywewZAUHkFMo8xJO7eSOAOjkaRRSTTfzRTqdblN65Mx7O2JhmzVc
+```
+
+## Results
+```
+HTTP/1.1 200 OK
+Content-Type: application/vnd.api+json
+
+{
+   "stories" :
+      {
+         "picture" : {
+            "href" : "http://img.youtube.com/vi/SE5Ip60_HJk/0.jpg"
+         },
+         "boxes" : [
+            {
+               "width" : 350,
+               "height" : 196,
+               "formats" : [
+                  {
+                     "href" : "http://static.siz.io/sequences/788798Y1112d.mp4",
+                     "type" : "mp4"
+                  }
+               ]
+            },
+            {
+               "width" : 350,
+               "height" : 196,
+               "formats" : [
+                  {
+                     "type" : "mp4",
+                     "href" : "http://static.siz.io/sequences/788798Y1112d.mp4"
+                  }
+               ]
+            },
+            {
+               "height" : 196,
+               "formats" : [
+                  {
+                     "href" : "http://static.siz.io/sequences/788798Y1112d.mp4",
+                     "type" : "mp4"
+                  }
+               ],
+               "width" : 350
+            },
+            {
+               "width" : 350,
+               "height" : 196,
+               "formats" : [
+                  {
+                     "href" : "http://static.siz.io/sequences/788798Y1112d.mp4",
+                     "type" : "mp4"
+                  }
+               ]
+            }
+         ],
+         "id" : "14217625935409c9a46d40cc",
+         "tags" : [
+            "meaningful-videos",
+            "news"
+         ],
+         "creationDate" : 1421762593540,
+         "slug" : "the-stand-up-kid",
+         "source" : {
+            "id" : "SE5Ip60_HJk",
+            "duration" : 187000,
+            "type" : "youtube"
+         },
+         "title" : "The stand up kid",
+         "href" : "/stories/14217625935409c9a46d40cc"
+      }
+}
+```
+
+# Retrieve a story by slug
+## Request
+```
+GET /stories/?slug=the-stand-up-kid
+X-Access-Token: fuEyvqImw2xbywewZAUHkFMo8xJO7eSOAOjkaRRSTTfzRTqdblN65Mx7O2JhmzVc
+```
+
+## Results
+```
+HTTP/1.1 200 OK
+Content-Type: application/vnd.api+json
+
+{
+   "stories" :
+      {
+         "picture" : {
+            "href" : "http://img.youtube.com/vi/SE5Ip60_HJk/0.jpg"
+         },
+         "boxes" : [
+            {
+               "width" : 350,
+               "height" : 196,
+               "formats" : [
+                  {
+                     "href" : "http://static.siz.io/sequences/788798Y1112d.mp4",
+                     "type" : "mp4"
+                  }
+               ]
+            },
+            {
+               "width" : 350,
+               "height" : 196,
+               "formats" : [
+                  {
+                     "type" : "mp4",
+                     "href" : "http://static.siz.io/sequences/788798Y1112d.mp4"
+                  }
+               ]
+            },
+            {
+               "height" : 196,
+               "formats" : [
+                  {
+                     "href" : "http://static.siz.io/sequences/788798Y1112d.mp4",
+                     "type" : "mp4"
+                  }
+               ],
+               "width" : 350
+            },
+            {
+               "width" : 350,
+               "height" : 196,
+               "formats" : [
+                  {
+                     "href" : "http://static.siz.io/sequences/788798Y1112d.mp4",
+                     "type" : "mp4"
+                  }
+               ]
+            }
+         ],
+         "id" : "14217625935409c9a46d40cc",
+         "tags" : [
+            "meaningful-videos",
+            "news"
+         ],
+         "creationDate" : 1421762593540,
+         "slug" : "the-stand-up-kid",
+         "source" : {
+            "id" : "SE5Ip60_HJk",
+            "duration" : 187000,
+            "type" : "youtube"
+         },
+         "title" : "The stand up kid",
+         "href" : "/stories/14217625935409c9a46d40cc"
+      }
+}
+```
