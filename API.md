@@ -2,14 +2,17 @@ API Specs
 =========
 
 # Create a token
-```
+```json
 POST /tokens
 
 {}
 ```
 
 ## Results
-```
+```json
+HTTP/1.1 201 Created
+Content-Type: application/vnd.api+json
+
 {
    "tokens" : {
       "href" : "/tokens/J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje",
@@ -21,7 +24,7 @@ POST /tokens
 
 # Create an user
 ## Request
-```
+```json
 POST /users
 X-Access-Token: J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
 
@@ -38,7 +41,7 @@ X-Access-Token: J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
 - password is not stored the same way as it's received :)
 
 ## Results
-```
+```json
 HTTP/1.1 201 Created
 Content-Type: application/vnd.api+json
 
@@ -58,7 +61,7 @@ Content-Type: application/vnd.api+json
   }
 }
 ```
-```
+```json
 HTTP/1.1 409 Conflict
 Content-Type: application/vnd.api+json
 
@@ -69,7 +72,7 @@ Content-Type: application/vnd.api+json
 }
 ```
 
-```
+```json
 HTTP/1.1 400 Bad Request
 Content-Type: application/vnd.api+json
 {
@@ -81,7 +84,7 @@ Content-Type: application/vnd.api+json
 }
 ```
 
-```
+```json
 HTTP/1.1 401 Unauthorized
 Content-Type: application/vnd.api+json
 
@@ -92,7 +95,7 @@ Content-Type: application/vnd.api+json
 }
 ```
 
-```
+```json
 HTTP/1.1 400 Bad Request
 Content-Type: application/vnd.api+json
 
@@ -106,7 +109,7 @@ Content-Type: application/vnd.api+json
 
 # Create an user with facebook
 ## Request
-```
+```json
 POST /users
 X-Access-Token: J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
 
@@ -122,7 +125,7 @@ X-Access-Token: J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
 - email and username are optional
 
 ## Results
-```
+```json
 HTTP/1.1 201 Created
 Content-Type: application/vnd.api+json
 
@@ -143,7 +146,7 @@ Content-Type: application/vnd.api+json
   }
 }
 ```
-```
+```json
 HTTP/1.1 409 Conflict
 Content-Type: application/vnd.api+json
 
@@ -154,7 +157,7 @@ Content-Type: application/vnd.api+json
 }
 ```
 
-```
+```json
 HTTP/1.1 400 Bad Request
 Content-Type: application/vnd.api+json
 {
@@ -167,7 +170,7 @@ Content-Type: application/vnd.api+json
 
 # Login by email
 ## Request
-```
+```json
 PUT /tokens/J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
 X-Access-Token: J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
 
@@ -180,7 +183,7 @@ X-Access-Token: J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
 ```
 
 ## Results
-```
+```json
 HTTP/1.1 200 OK
 Content-Type: application/vnd.api+json
 
@@ -200,7 +203,7 @@ Content-Type: application/vnd.api+json
   }
 }
 ```
-```
+```json
 HTTP/1.1 404 Not Found
 Content-Type: application/vnd.api+json
 
@@ -210,7 +213,7 @@ Content-Type: application/vnd.api+json
    }
 }
 ```
-```
+```json
 HTTP/1.1 401 Unauthorized
 Content-Type: application/vnd.api+json
 
@@ -223,7 +226,7 @@ Content-Type: application/vnd.api+json
 
 # Login by username
 ## Request
-```
+```json
 PUT /tokens/J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
 X-Access-Token: J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
 
@@ -236,7 +239,7 @@ X-Access-Token: J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
 ```
 
 ## Results
-```
+```json
 HTTP/1.1 200 OK
 Content-Type: application/vnd.api+json
 
@@ -256,7 +259,7 @@ Content-Type: application/vnd.api+json
   }
 }
 ```
-```
+```json
 HTTP/1.1 404 Not Found
 Content-Type: application/vnd.api+json
 
@@ -266,7 +269,7 @@ Content-Type: application/vnd.api+json
    }
 }
 ```
-```
+```json
 HTTP/1.1 401 Unauthorized
 Content-Type: application/vnd.api+json
 
@@ -279,7 +282,7 @@ Content-Type: application/vnd.api+json
 
 # Login by facebook
 ## Request
-```
+```json
 PUT /tokens/J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
 X-Access-Token: J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
 
@@ -291,7 +294,7 @@ X-Access-Token: J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
 ```
 
 ## Results
-```
+```json
 HTTP/1.1 200 OK
 Content-Type: application/vnd.api+json
 
@@ -313,7 +316,7 @@ Content-Type: application/vnd.api+json
 }
 ```
 
-```
+```json
 HTTP/1.1 404 Not Found
 Content-Type: application/vnd.api+json
 
@@ -334,7 +337,7 @@ X-Access-Token: J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
 
 ## Results
 
-```
+```json
 HTTP/1.1 200 OK
 Content-Type: application/vnd.api+json
 
@@ -346,7 +349,7 @@ Content-Type: application/vnd.api+json
 }
 ```
 
-```
+```json
 HTTP/1.1 404 Not Found
 Content-Type: application/vnd.api+json
 
@@ -365,7 +368,7 @@ X-Access-Token: fuEyvqImw2xbywewZAUHkFMo8xJO7eSOAOjkaRRSTTfzRTqdblN65Mx7O2JhmzVc
 ```
 
 ## Results
-```
+```json
 HTTP/1.1 200 OK
 Content-Type: application/vnd.api+json
 
@@ -378,7 +381,7 @@ Content-Type: application/vnd.api+json
   }
 }
 ```
-```
+```json
 HTTP/1.1 403 Forbidden
 Content-Type: application/vnd.api+json
 
@@ -388,7 +391,7 @@ Content-Type: application/vnd.api+json
    }
 }
 ```
-```
+```json
 HTTP/1.1 401 Unauthorized
 Content-Type: application/vnd.api+json
 
@@ -407,7 +410,7 @@ X-Access-Token: fuEyvqImw2xbywewZAUHkFMo8xJO7eSOAOjkaRRSTTfzRTqdblN65Mx7O2JhmzVc
 ```
 
 ## Results
-```
+```json
 HTTP/1.1 200 OK
 Content-Type: application/vnd.api+json
 
@@ -487,7 +490,7 @@ X-Access-Token: fuEyvqImw2xbywewZAUHkFMo8xJO7eSOAOjkaRRSTTfzRTqdblN65Mx7O2JhmzVc
 ```
 
 ## Results
-```
+```json
 HTTP/1.1 200 OK
 Content-Type: application/vnd.api+json
 
@@ -565,7 +568,7 @@ X-Access-Token: fuEyvqImw2xbywewZAUHkFMo8xJO7eSOAOjkaRRSTTfzRTqdblN65Mx7O2JhmzVc
 ```
 
 ## Results
-```
+```json
 HTTP/1.1 200 OK
 Content-Type: application/vnd.api+json
 
