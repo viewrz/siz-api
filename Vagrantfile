@@ -22,9 +22,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.define "rethinkdb" do |rethinkdb|
     rethinkdb.vm.provider "docker" do |d|
-      d.image = "rethinkdb"
+      d.image = "jdauphant/rethinkdb:1.11.3"
       d.name = "siz-api-rethinkdb"
       d.ports = ["8080:8080"]
+      d.cmd = ["rethinkdb","--bind","all"]
     end
   end
 
