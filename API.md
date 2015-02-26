@@ -637,3 +637,29 @@ Content-Type: application/json
       }
 }
 ```
+
+# Like/Nope a story
+## Request
+```
+POST /events HTTP/1.1
+X-Access-Token: fuEyvqImw2xbywewZAUHkFMo8xJO7eSOAOjkaRRSTTfzRTqdblN65Mx7O2JhmzVc
+
+{
+   "events" : {
+       "storyId": "14217643385589f1f819dc77",
+       "type" : "nope",
+       "tags" : ["cute"]
+   }
+}
+```
+
+## Notes
+- Type can be nope/like
+- Tags,storyId,type are mandatory
+
+## Results
+```json
+HTTP/1.1 204 No Content
+Content-Type: application/json
+
+```
