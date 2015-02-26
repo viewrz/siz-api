@@ -24,6 +24,9 @@ trait MongoJsonFormats extends CommonJsonFormats {
   def mongoWritesStringId[T](w : Writes[T]): Writes[T] = {
     w.transform( js => js.as[JsObject] - "id"  ++ Json.obj("_id" -> js \ "id"))
   }
+  def withDefault[A](key:String, default: List[String])(r:Reads[A]) = {
+    __.json.update((__ \ key).json.copyFrom((__ \ key).json.pick orElse Reads.pure(Json.toJson(default)))) andThen r
+  }
 
   implicit val tokenRead = mongoReadsStringId[Token](Json.reads[Token])
   implicit val tokenWrite = mongoWritesStringId[Token](Json.writes[Token])
@@ -31,7 +34,7 @@ trait MongoJsonFormats extends CommonJsonFormats {
   implicit val userWrite = mongoWritesObjectId[User](Json.writes[User])
   implicit val eventRead = mongoReadsObjectId[Event](Json.reads[Event])
   implicit val eventWrite = mongoWritesObjectId[Event](Json.writes[Event])
-  implicit val viewerProfileRead = mongoReadsObjectId[ViewerProfile](Json.reads[ViewerProfile])
+  implicit val viewerProfileRead = withDefault("nopeStoryIds", List())(withDefault("likeStoryIds", List())(mongoReadsObjectId[ViewerProfile](Json.reads[ViewerProfile])))
   implicit val viewerProfileWrite = mongoWritesObjectId[ViewerProfile](Json.writes[ViewerProfile])
   implicit val videoFormatRead = typeReads[VideoFormat](Json.reads[VideoFormat])
   implicit val videoFormatWrite = typeWrites[VideoFormat](Json.writes[VideoFormat])

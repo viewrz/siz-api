@@ -34,7 +34,7 @@ object Stories extends Controller with APIJsonFormats {
           case false =>
             List()
         }
-        val futureStories = Story.find(limit, orderBy,viewerProfile.viewedStoryIds,filteredTags)
+        val futureStories = Story.find(limit, orderBy,viewerProfile.likeStoryIds ::: viewerProfile.nopeStoryIds,filteredTags)
         futureStories.map {
           results =>
             Ok(Json.toJson(TopLevel(stories = Some(Right(results)))))
