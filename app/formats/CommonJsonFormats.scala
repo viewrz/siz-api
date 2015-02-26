@@ -17,5 +17,9 @@ trait CommonJsonFormats {
       w.transform( js => js.as[JsObject] - "_type"  ++ Json.obj("type" ->  js \ "_type") )
    }
 
+   def typeReads[T](r: Reads[T]): Reads[T] = {
+      __.json.update((__ \ '_type).json.copyFrom((__ \ 'type).json.pick[JsString] )) andThen r
+   }
+
    implicit val shortlistRead = Json.reads[Shortlist]
 }

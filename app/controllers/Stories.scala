@@ -26,31 +26,31 @@ object Stories extends Controller with APIJsonFormats {
 
   def find(limit: Int, orderBy: String, viewerProfileId: String, tagsFilter: Boolean) = {
     val removeTagsWithWeight = -3
-      ViewerProfile.findById(viewerProfileId).flatMap {
-        viewerProfile =>
-          val filteredTags = tagsFilter match {
-            case true =>
-              viewerProfile.tagsFilterBy(_._2 <= removeTagsWithWeight)
-            case false =>
-              List()
-          }
-          val futureStory = OldStory.find(limit, orderBy,viewerProfile.viewedStoryIds,filteredTags)
-          futureStory.map {
-            results =>
-              Ok(Json.toJson(TopLevel(stories = Some(Right(Story.oldStoriesToStories(results))))))
-          }
-      }
+    ViewerProfile.findById(viewerProfileId).flatMap {
+      viewerProfile =>
+        val filteredTags = tagsFilter match {
+          case true =>
+            viewerProfile.tagsFilterBy(_._2 <= removeTagsWithWeight)
+          case false =>
+            List()
+        }
+        val futureStories = Story.find(limit, orderBy,viewerProfile.viewedStoryIds,filteredTags)
+        futureStories.map {
+          results =>
+            Ok(Json.toJson(TopLevel(stories = Some(Right(results)))))
+        }
+    }
   }
 
   def getById(id: String) = LoggingAction {
     TokenCheckAction.async { request =>
       id match {
         case StoryIdRegex() =>
-          OldStory.getById(id).map {
+          Story.getById(id).map {
             case None =>
-              NotFound(Error.toTopLevelJson(Error("No story for this id %s and %s creationDate".format(id,OldStory.newIdToOldId(id)))))
+              NotFound(Error.toTopLevelJson(Error("No story for this id %s".format(id))))
             case Some(story) =>
-              Ok(Json.toJson(TopLevel(stories = Some(Left(Story.oldStoryToStory(story))))))
+              Ok(Json.toJson(TopLevel(stories = Some(Left(story)))))
           }
         case _ =>
           Future.successful(Ok(Error.toTopLevelJson(Error("Invalid id"))))
@@ -58,9 +58,11 @@ object Stories extends Controller with APIJsonFormats {
     }
   }
 
-  def getBySlug(slug: String) = OldStory.getBySlug(slug).map {
-      result =>
-       Ok(Json.toJson(TopLevel(stories = Some(Left(Story.oldStoryToStory(result))))))
+  def getBySlug(slug: String) = Story.getBySlug(slug).map {
+      case None =>
+        NotFound(Error.toTopLevelJson(Error("No story for this slug %s".format(slug))))
+      case Some(story) =>
+        Ok(Json.toJson(TopLevel(stories = Some(Left(story)))))
     }
 
 }

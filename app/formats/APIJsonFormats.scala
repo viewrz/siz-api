@@ -15,6 +15,16 @@ trait APIJsonFormats extends CommonJsonFormats {
       Json.obj("href" -> JsString("/%s/%s".format(objType,(js \ "id").as[String])))
   }
 
+  def addHttpToHref[T](w : Writes[T]): Writes[T] = w.transform {
+    js =>
+      (js \ "href").as[String] match {
+        case href: String if href.matches("^//[^/].*") =>
+          js.as[JsObject] - "href" ++ Json.obj("href" -> JsString("http:"+href))
+        case _ =>
+          js.as[JsObject]
+      }
+  }
+
   implicit val tokenWrites: Writes[Token] = addHref("tokens",Json.writes[Token].transform{
     js => js.as[JsObject] - "userId"
   })
@@ -59,16 +69,8 @@ trait APIJsonFormats extends CommonJsonFormats {
   implicit val emailWrite = addHref("emails",Json.writes[Email])
 
   implicit val sourceWrite = typeWrites(Json.writes[Source])
-  implicit val videoFormatWrite = typeWrites(Json.writes[VideoFormat])
-  implicit val imageWrite = Json.writes[Image].transform {
-    js =>
-      (js \ "href").as[String] match {
-        case href: String if href.matches("^//[^/].*") =>
-          js.as[JsObject] - "href" ++ Json.obj("href" -> JsString("http:"+href))
-        case _ =>
-          js.as[JsObject]
-      }
-  }
+  implicit val videoFormatWrite = addHttpToHref(typeWrites(Json.writes[VideoFormat]))
+  implicit val imageWrite = addHttpToHref(Json.writes[Image])
   implicit val boxesWrite = Json.writes[Box]
   implicit val storyWrite = addHref("stories",Json.writes[Story])
 

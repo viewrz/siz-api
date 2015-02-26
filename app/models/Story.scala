@@ -5,7 +5,11 @@ import java.util.Date
 import com.rethinkscala.Document
 import com.rethinkscala.Implicits.Async._
 import com.rethinkscala.ast.Random
+import reactivemongo.api.QueryOpts
+import reactivemongo.bson.BSONObjectID
 import utils.Hash
+import play.api.libs.json.Json
+import play.modules.reactivemongo.json.ImplicitBSONHandlers._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -45,7 +49,7 @@ object Box {
 
 case class Source(id: String,
                   _type: String,
-                  duration: Long)
+                  duration: Option[Long])
 /*,
                   start: Option[Long],
                   stop: Option[Long])*/
@@ -76,10 +80,18 @@ object OldStory extends RethinkModel[OldStory]("video"){
   def getById(id: String) = table.filter(Map("date" -> newIdToOldId(id))).as[Seq[OldStory]].map(_.headOption)
 }
 
-object Story {
+object Story extends MongoModel("stories"){
   def oldIdToNewId(oldId: String, date: Date) = date.getTime.toString+Hash.md5(oldId).substring(0,11)
   def oldStoriesToStories(oldStories: Seq[OldStory]): Seq[Story] = oldStories.map(Story.oldStoryToStory)
   def oldStoryToStory(s: OldStory) = Story(Box.oldBoxesToBoxes(s.boxes.get, s), s.date, oldIdToNewId(s.id,s.date),s.id, Source.oldStoryToSource(s), Image(s.pictureUrl), s.title, s.shortlist :: Shortlist.get(s.shortlist).map(List(_)).getOrElse(Nil))
+
+  def find(limit: Int, orderBy: String, exceptStoryIds: List[String] = List(), exceptTags: List[String] = List()) =
+      collection.find(Json.obj("_id" ->  Json.obj("$nin" -> exceptStoryIds.map(id => Json.obj("$oid" -> id))),
+                               "tags" -> Json.obj("$not" -> Json.obj("$elemMatch" -> Json.obj("$in" -> exceptTags)))
+      )).options(QueryOpts().batchSize(limit)).sort( Json.obj(orderBy -> -1) ).cursor[Story].collect[List](limit)
+  def getBySlug(slug: String) = collection.find(Json.obj("slug" -> slug)).cursor[Story].collect[List]().map(_.headOption)
+  def getById(id: String) = collection.find(Json.obj("_id" -> Json.obj("$oid" -> id))).cursor[Story].collect[List]().map(_.headOption)
+
 }
 
 object Source {
@@ -91,7 +103,7 @@ object Source {
     Source(
       s.sourceId,
       s.source,
-      doubleSecondsToLongMs(s.duration)
+      Some(doubleSecondsToLongMs(s.duration))
        /*,
       s.start.map(doubleSecondsToLongMs), //.map(floatSecondsToIntMs),
       s.stop.map(doubleSecondsToLongMs) //.map(floatSecondsToIntMs) */
