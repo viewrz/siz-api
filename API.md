@@ -563,7 +563,7 @@ Content-Type: application/json
 # Retrieve a story by slug
 ## Request
 ```
-GET /stories/?slug=the-stand-up-kid
+GET /stories?slug=the-stand-up-kid
 X-Access-Token: fuEyvqImw2xbywewZAUHkFMo8xJO7eSOAOjkaRRSTTfzRTqdblN65Mx7O2JhmzVc
 ```
 
@@ -640,7 +640,7 @@ Content-Type: application/json
 
 # Like/Nope a story
 ## Request
-```
+```json
 POST /events HTTP/1.1
 X-Access-Token: fuEyvqImw2xbywewZAUHkFMo8xJO7eSOAOjkaRRSTTfzRTqdblN65Mx7O2JhmzVc
 
