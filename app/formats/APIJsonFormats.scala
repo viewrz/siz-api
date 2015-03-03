@@ -35,7 +35,7 @@ trait APIJsonFormats extends CommonJsonFormats {
   val EmailRegex = """^(?!\.)("([^"\r\\]|\\["\r\\])*"|([-a-zA-Z0-9!#$%&'*+/=?^_`{|}~]|(?<!\.)\.)*)(?<!\.)@[a-zA-Z0-9][\w\.-]*[a-zA-Z0-9]\.[a-zA-Z][a-zA-Z\.]*[a-zA-Z]$""".r
   val UsernameRegex = "[0-9a-zA-Z.]{2,20}".r
   val FacebookTokenRegex = "[^;\t\n]{1,1024}".r
-  val StoryIdRegex = "[0-9]{13}[0-9a-z]{11}".r
+  val StoryIdRegex = "[0-9a-z]{24}".r
   val TagsRegex = "[0-9a-z-]{1,50}".r
 
   implicit val newUserRead: Reads[NewUser]  = (
@@ -54,7 +54,6 @@ trait APIJsonFormats extends CommonJsonFormats {
   implicit val eventRead: Reads[NewEvent]  = (
       (__ \ "storyId").read[String](pattern(StoryIdRegex, "error.story.id")) and
       (__ \ "type").read[String](likeNopeValidate) and
-      (__ \ "tags").read[List[String]](minLength[List[String]](1) keepAnd filter(ValidationError("error.tag"))(isValidTagList)) and
       (__ \ "date").readNullable[Date].map(_.getOrElse(new Date()))
     )(NewEvent.apply _)
 
@@ -65,6 +64,8 @@ trait APIJsonFormats extends CommonJsonFormats {
     (__ \ "facebookToken").readNullable[String](pattern(FacebookTokenRegex, "error.facebookToken"))
   )(LoginUser.apply _)
 
+
+  implicit val eventWrite = typeWrites(Json.writes[Event])
   implicit val errorWrite = Json.writes[Error]
   implicit val emailWrite = addHref("emails",Json.writes[Email])
 

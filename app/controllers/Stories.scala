@@ -44,16 +44,11 @@ object Stories extends Controller with APIJsonFormats {
 
   def getById(id: String) = LoggingAction {
     TokenCheckAction.async { request =>
-      id match {
-        case StoryIdRegex() =>
-          Story.getById(id).map {
-            case None =>
-              NotFound(Error.toTopLevelJson(Error("No story for this id %s".format(id))))
-            case Some(story) =>
-              Ok(Json.toJson(TopLevel(stories = Some(Left(story)))))
-          }
-        case _ =>
-          Future.successful(Ok(Error.toTopLevelJson(Error("Invalid id"))))
+      Story.getById(id).map {
+        case None =>
+          NotFound(Error.toTopLevelJson(Error("No story for this id %s".format(id))))
+        case Some(story) =>
+          Ok(Json.toJson(TopLevel(stories = Some(Left(story)))))
       }
     }
   }
