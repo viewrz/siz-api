@@ -18,7 +18,7 @@ case class Event(storyId: String, _type: String, tags: List[String], viewerProfi
 object Event extends MongoModel("events")
 {
   def ensureIndexes = {
-    collection.indexesManager.ensure(Index(Seq("storyId" -> IndexType.Ascending), name = Some("storyIdUniqueIndex"), unique = true, sparse = true))
+     collection.indexesManager.ensure(Index(Seq("storyId" -> IndexType.Ascending,"viewerProfileId" -> IndexType.Ascending), name = Some("storyIdViewerProfileIdUniqueIndex"), unique = true, sparse = true))
   }
 
   def newEventToEvent(newEvent: NewEvent, viewerProfileId: String): Event = Event(newEvent.storyId,newEvent._type,newEvent.tags,viewerProfileId, BSONObjectID.generate.stringify)
