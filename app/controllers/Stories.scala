@@ -13,18 +13,18 @@ import scala.concurrent.Future
 
 object Stories extends Controller with APIJsonFormats {
 
-  def dispatcher(limit: Int, orderBy: String, slug: Option[String]) = LoggingAction {
+  def dispatcher(limit: Int, orderBy: String, filterBy: String, slug: Option[String], sinceId: Option[String], lastSkipId: Option[String]) = LoggingAction {
     TokenCheckAction.async { request =>
       slug match {
         case None =>
-          find(limit, orderBy, request.token.viewerProfileId, request.token.userId != None)
+          find(limit, orderBy, request.token.viewerProfileId, request.token.userId != None, filterBy, sinceId, lastSkipId)
         case Some(slug) =>
           getBySlug(slug)
       }
     }
   }
 
-  def find(limit: Int, orderBy: String, viewerProfileId: String, tagsFilter: Boolean) = {
+  def find(limit: Int, orderBy: String, viewerProfileId: String, tagsFilter: Boolean, filterBy: String, sinceId: Option[String], lastSkipId: Option[String]) = {
     val removeTagsWithWeight = -3
     ViewerProfile.findById(viewerProfileId).flatMap {
       viewerProfile =>
@@ -34,7 +34,27 @@ object Stories extends Controller with APIJsonFormats {
           case false =>
             List()
         }
-        val futureStories = Story.find(limit, orderBy,viewerProfile.likeStoryIds ::: viewerProfile.nopeStoryIds,filteredTags)
+        val futureStories = filterBy match {
+          case "recommends" =>
+            Story.findRecommends(limit, orderBy,viewerProfile.likeStoryIds ::: viewerProfile.nopeStoryIds,filteredTags)
+          case "likes" =>
+            val allIds = viewerProfile.likeStoryIds
+            val ids = (sinceId,lastSkipId) match {
+              case (Some(lastSkipId),None) =>
+                allIds.dropWhile(_!=lastSkipId).tail.take(limit)
+              case (Some(lastSkipId),Some(sinceId)) =>
+                allIds.dropWhile(_!=lastSkipId).tail.take(limit).takeWhile(_!=sinceId)
+              case (None,Some(sinceId)) =>
+                allIds.take(limit).takeWhile(_!=sinceId)
+              case (None,None) =>
+                allIds.take(limit)
+              case _ =>
+                List()
+            }
+            Story.getByIds(ids)
+          case _ =>
+            Future.successful(List())
+        }
         futureStories.map {
           results =>
             Ok(Json.toJson(TopLevel(stories = Some(Right(results)))))

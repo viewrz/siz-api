@@ -30,13 +30,15 @@ case class Story(boxes: List[Box],
                  title: String,
                  tags: List[String])
 
-
-
 object Story extends MongoModel("stories"){
-  def find(limit: Int, orderBy: String, exceptStoryIds: List[String] = List(), exceptTags: List[String] = List()) =
+  def findRecommends(limit: Int, orderBy: String, exceptStoryIds: List[String] = List(), exceptTags: List[String] = List()) =
       collection.find(Json.obj("_id" ->  Json.obj("$nin" -> exceptStoryIds.map(id => Json.obj("$oid" -> id))),
                                "tags" -> Json.obj("$not" -> Json.obj("$elemMatch" -> Json.obj("$in" -> exceptTags)))
       )).options(QueryOpts().batchSize(limit)).sort( Json.obj(orderBy -> -1) ).cursor[Story].collect[List](limit)
+  def getByIds(ids: List[String]) =
+      collection.find(Json.obj("_id" ->  Json.obj("$in" -> ids.map(id => Json.obj("$oid" -> id))))).cursor[Story].collect[List]()
+
+
   def getBySlug(slug: String) = collection.find(Json.obj("slug" -> slug)).cursor[Story].collect[List]().map(_.headOption)
   def getById(id: String) = collection.find(Json.obj("_id" -> Json.obj("$oid" -> id))).cursor[Story].collect[List]().map(_.headOption)
 
