@@ -11,7 +11,7 @@ case class ViewerProfile(id: String, likeStoryIds: List[String] = List(), nopeSt
   def tagsFilterBy(filter: ((String,Int)) => (Boolean)) = this.tagsWeights.filter(filter).map(_._1).toList
 }
 
-object ViewerProfile extends MongoModel("viewerprofile")
+object ViewerProfile extends MongoModel("viewerprofiles")
 {
   def findById(id: String): Future[ViewerProfile] = collection.find(Json.obj("_id" -> Json.obj("$oid" -> id))).cursor[ViewerProfile].collect[List]().map{
     case vp :: Nil =>
