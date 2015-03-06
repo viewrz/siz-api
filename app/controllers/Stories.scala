@@ -42,8 +42,8 @@ object Stories extends Controller with APIJsonFormats {
                 Ok(Json.toJson(TopLevel(stories = Some(Right(results)))))
             }
           case "likes" =>
-            val allIds = viewerProfile.likeStoryIds
-            val ids = ((sinceId,lastSkippedId) match {
+            val allIds = viewerProfile.likeStoryIds.reverse
+            val ids = (lastSkippedId,sinceId) match {
               case (Some(lastSkippedId),None) =>
                 allIds.dropWhile(_!=lastSkippedId).tail.take(limit)
               case (Some(lastSkippedId),Some(sinceId)) =>
@@ -54,7 +54,7 @@ object Stories extends Controller with APIJsonFormats {
                 allIds.take(limit)
               case _ =>
                 List()
-            }).reverse
+            }
             val futureStories =Story.getByIds(ids).map(_.sortBy(story => ids.indexOf(story.id)))
             val links: Option[Map[String,String]] = ids.headOption.map( _ => Map("previous" -> s"/stories?filterBy=likes&sinceId=%s".format(ids.head),
               "next" -> s"/stories?filterBy=likes&lastSkippedId=%s".format(ids.last)
