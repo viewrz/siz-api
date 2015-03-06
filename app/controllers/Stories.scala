@@ -13,18 +13,18 @@ import scala.concurrent.Future
 
 object Stories extends Controller with APIJsonFormats {
 
-  def dispatcher(limit: Int, orderBy: String, filterBy: String, slug: Option[String], sinceId: Option[String], lastSkipId: Option[String]) = LoggingAction {
+  def dispatcher(limit: Int, orderBy: String, filterBy: String, slug: Option[String], sinceId: Option[String], lastSkippedId: Option[String]) = LoggingAction {
     TokenCheckAction.async { request =>
       slug match {
         case None =>
-          find(limit, orderBy, request.token.viewerProfileId, request.token.userId != None, filterBy, sinceId, lastSkipId)
+          find(limit, orderBy, request.token.viewerProfileId, request.token.userId != None, filterBy, sinceId, lastSkippedId)
         case Some(slug) =>
           getBySlug(slug)
       }
     }
   }
 
-  def find(limit: Int, orderBy: String, viewerProfileId: String, tagsFilter: Boolean, filterBy: String, sinceId: Option[String], lastSkipId: Option[String]) = {
+  def find(limit: Int, orderBy: String, viewerProfileId: String, tagsFilter: Boolean, filterBy: String, sinceId: Option[String], lastSkippedId: Option[String]) = {
     val removeTagsWithWeight = -3
     ViewerProfile.findById(viewerProfileId).flatMap {
       viewerProfile =>
@@ -43,11 +43,11 @@ object Stories extends Controller with APIJsonFormats {
             }
           case "likes" =>
             val allIds = viewerProfile.likeStoryIds
-            val ids = ((sinceId,lastSkipId) match {
-              case (Some(lastSkipId),None) =>
-                allIds.dropWhile(_!=lastSkipId).tail.take(limit)
-              case (Some(lastSkipId),Some(sinceId)) =>
-                allIds.dropWhile(_!=lastSkipId).tail.take(limit).takeWhile(_!=sinceId)
+            val ids = ((sinceId,lastSkippedId) match {
+              case (Some(lastSkippedId),None) =>
+                allIds.dropWhile(_!=lastSkippedId).tail.take(limit)
+              case (Some(lastSkippedId),Some(sinceId)) =>
+                allIds.dropWhile(_!=lastSkippedId).tail.take(limit).takeWhile(_!=sinceId)
               case (None,Some(sinceId)) =>
                 allIds.take(limit).takeWhile(_!=sinceId)
               case (None,None) =>
@@ -57,7 +57,7 @@ object Stories extends Controller with APIJsonFormats {
             }).reverse
             val futureStories =Story.getByIds(ids).map(_.sortBy(story => ids.indexOf(story.id)))
             val links: Option[Map[String,String]] = ids.headOption.map( _ => Map("previous" -> s"/stories?filterBy=likes&sinceId=%s".format(ids.head),
-              "next" -> s"/stories?filterBy=likes&maxSkipId=%s".format(ids.last)
+              "next" -> s"/stories?filterBy=likes&lastSkippedId=%s".format(ids.last)
             ) )
             futureStories.map {
               results =>
