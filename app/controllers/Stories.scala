@@ -56,12 +56,12 @@ object Stories extends Controller with APIJsonFormats {
                 List()
             }).reverse
             val futureStories =Story.getByIds(ids).map(_.sortBy(story => ids.indexOf(story.id)))
-            val links = Map("previous" -> s"/stories?filterBy=likes&sinceId=%s".format(ids.head),
+            val links: Option[Map[String,String]] = ids.headOption.map( _ => Map("previous" -> s"/stories?filterBy=likes&sinceId=%s".format(ids.head),
               "next" -> s"/stories?filterBy=likes&maxSkipId=%s".format(ids.last)
-            )
+            ) )
             futureStories.map {
               results =>
-                Ok(Json.toJson(TopLevel(stories = Some(Right(results)), links = Some(links))))
+                Ok(Json.toJson(TopLevel(stories = Some(Right(results)), links = links)))
             }
           case _ =>
             Future.successful(BadRequest(Error.toTopLevelJson("Incorrect value for filterBy")))
