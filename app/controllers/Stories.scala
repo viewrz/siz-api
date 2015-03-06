@@ -34,12 +34,16 @@ object Stories extends Controller with APIJsonFormats {
           case false =>
             List()
         }
-        val futureStories = filterBy match {
+        filterBy match {
           case "recommends" =>
-            Story.findRecommends(limit, orderBy,viewerProfile.likeStoryIds ::: viewerProfile.nopeStoryIds,filteredTags)
+            val futureStories = Story.findRecommends(limit, orderBy,viewerProfile.likeStoryIds ::: viewerProfile.nopeStoryIds,filteredTags)
+            futureStories.map {
+              results =>
+                Ok(Json.toJson(TopLevel(stories = Some(Right(results)))))
+            }
           case "likes" =>
             val allIds = viewerProfile.likeStoryIds
-            val ids = (sinceId,lastSkipId) match {
+            val ids = ((sinceId,lastSkipId) match {
               case (Some(lastSkipId),None) =>
                 allIds.dropWhile(_!=lastSkipId).tail.take(limit)
               case (Some(lastSkipId),Some(sinceId)) =>
@@ -50,15 +54,19 @@ object Stories extends Controller with APIJsonFormats {
                 allIds.take(limit)
               case _ =>
                 List()
+            }).reverse
+            val futureStories =Story.getByIds(ids).map(_.sortBy(story => ids.indexOf(story.id)))
+            val links = Map("previous" -> s"/stories?filterBy=likes&sinceId=%s".format(ids.head),
+              "next" -> s"/stories?filterBy=likes&maxSkipId=%s".format(ids.last)
+            )
+            futureStories.map {
+              results =>
+                Ok(Json.toJson(TopLevel(stories = Some(Right(results)), links = Some(links))))
             }
-            Story.getByIds(ids).map(_.sortBy(story => -ids.indexOf(story.id)))
           case _ =>
-            Future.successful(List())
+            Future.successful(BadRequest(Error.toTopLevelJson("Incorrect value for filterBy")))
         }
-        futureStories.map {
-          results =>
-            Ok(Json.toJson(TopLevel(stories = Some(Right(results)))))
-        }
+
     }
   }
 
