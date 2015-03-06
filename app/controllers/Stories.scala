@@ -51,7 +51,7 @@ object Stories extends Controller with APIJsonFormats {
               case _ =>
                 List()
             }
-            Story.getByIds(ids)
+            Story.getByIds(ids).map(_.sortBy(story => -ids.indexOf(story.id)))
           case _ =>
             Future.successful(List())
         }
