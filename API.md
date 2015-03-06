@@ -688,13 +688,13 @@ X-Access-Token: fuEyvqImw2xbywewZAUHkFMo8xJO7eSOAOjkaRRSTTfzRTqdblN65Mx7O2JhmzVc
 
 ## Request liked stories after the last Id you have
 ```json
-GET /stories?filterBy=likes&maxSkipId=14217708191527cfae71d478
+GET /stories?filterBy=likes&lastSkippedId=14217708191527cfae71d478
 X-Access-Token: fuEyvqImw2xbywewZAUHkFMo8xJO7eSOAOjkaRRSTTfzRTqdblN65Mx7O2JhmzVc
 ```
 
 ## Notes
 - Results are ordered by last stories liked
-- "sinceId" and "maxSkipId" can be combined
+- "sinceId" and "lastSkippedId" can be combined
 - You can use "limit" params to choose the number of stories by request (default to 12)
 
 ## Results
