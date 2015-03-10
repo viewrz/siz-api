@@ -6,12 +6,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
-case class ViewerProfile(id: String, viewedStoryIds: List[String] = List(), tagsWeights: Map[String,Int] = Map())
+case class ViewerProfile(id: String, likeStoryIds: List[String] = List(), nopeStoryIds: List[String] = List(), tagsWeights: Map[String,Int] = Map())
 {
   def tagsFilterBy(filter: ((String,Int)) => (Boolean)) = this.tagsWeights.filter(filter).map(_._1).toList
 }
 
-object ViewerProfile extends MongoModel("viewerprofile")
+object ViewerProfile extends MongoModel("viewerprofiles")
 {
   def findById(id: String): Future[ViewerProfile] = collection.find(Json.obj("_id" -> Json.obj("$oid" -> id))).cursor[ViewerProfile].collect[List]().map{
     case vp :: Nil =>
@@ -24,7 +24,7 @@ object ViewerProfile extends MongoModel("viewerprofile")
     collection.update(
       Json.obj("_id" -> Json.obj("$oid" -> event.viewerProfileId)),
       Json.obj(
-        "$addToSet" -> Json.obj("viewedStoryIds" -> event.storyId),
+        "$addToSet" -> Json.obj(event._type+"StoryIds" -> event.storyId),
         "$inc" -> JsObject(event.tags.map(tag => ("tagsWeights."+tag, JsNumber(event.tagsWeight))))
       ),
       multi = false,

@@ -409,6 +409,9 @@ GET /stories
 X-Access-Token: fuEyvqImw2xbywewZAUHkFMo8xJO7eSOAOjkaRRSTTfzRTqdblN65Mx7O2JhmzVc
 ```
 
+## Notes
+- You can use "limit" params to choose the number of stories by request (default to 12)
+
 ## Results
 ```json
 HTTP/1.1 200 OK
@@ -563,7 +566,7 @@ Content-Type: application/json
 # Retrieve a story by slug
 ## Request
 ```
-GET /stories/?slug=the-stand-up-kid
+GET /stories?slug=the-stand-up-kid
 X-Access-Token: fuEyvqImw2xbywewZAUHkFMo8xJO7eSOAOjkaRRSTTfzRTqdblN65Mx7O2JhmzVc
 ```
 
@@ -637,3 +640,132 @@ Content-Type: application/json
       }
 }
 ```
+
+# Like/Nope a story
+## Request
+```json
+POST /events HTTP/1.1
+X-Access-Token: fuEyvqImw2xbywewZAUHkFMo8xJO7eSOAOjkaRRSTTfzRTqdblN65Mx7O2JhmzVc
+
+{
+   "events" : {
+       "storyId": "14217643385589f1f819dc77",
+       "type" : "nope"
+   }
+}
+```
+
+## Notes
+- Type can be like or nope
+
+## Results
+```json
+HTTP/1.1 201 Created
+Content-Type: application/json
+
+{
+    "events": {
+        "storyId": "14217643385589f1f819dc77",
+        "id": "54f986a3590000ae0331438b",
+        "date": 1425639075852,
+        "type": "nope"
+    }
+}
+```
+
+# Retrieve liked stories
+## Request
+```json
+GET /stories?filterBy=likes
+X-Access-Token: fuEyvqImw2xbywewZAUHkFMo8xJO7eSOAOjkaRRSTTfzRTqdblN65Mx7O2JhmzVc
+```
+
+## Request liked stories before the first Id you have
+```json
+GET /stories?filterBy=likes&sinceId=1421764247847062159db364
+X-Access-Token: fuEyvqImw2xbywewZAUHkFMo8xJO7eSOAOjkaRRSTTfzRTqdblN65Mx7O2JhmzVc
+```
+
+## Request liked stories after the last Id you have
+```json
+GET /stories?filterBy=likes&lastSkippedId=14217708191527cfae71d478
+X-Access-Token: fuEyvqImw2xbywewZAUHkFMo8xJO7eSOAOjkaRRSTTfzRTqdblN65Mx7O2JhmzVc
+```
+
+## Notes
+- Results are ordered by last stories liked
+- "sinceId" and "lastSkippedId" can be combined
+- You can use "limit" params to choose the number of stories by request (default to 12)
+
+## Results
+```json
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+   "stories" : [
+      {
+         "picture" : {
+            "href" : "http://img.youtube.com/vi/SE5Ip60_HJk/0.jpg"
+         },
+         "boxes" : [
+            {
+               "width" : 350,
+               "height" : 196,
+               "formats" : [
+                  {
+                     "href" : "http://static.siz.io/sequences/788798Y1112d.mp4",
+                     "type" : "mp4"
+                  }
+               ]
+            },
+            {
+               "width" : 350,
+               "height" : 196,
+               "formats" : [
+                  {
+                     "type" : "mp4",
+                     "href" : "http://static.siz.io/sequences/788798Y1112d.mp4"
+                  }
+               ]
+            },
+            {
+               "height" : 196,
+               "formats" : [
+                  {
+                     "href" : "http://static.siz.io/sequences/788798Y1112d.mp4",
+                     "type" : "mp4"
+                  }
+               ],
+               "width" : 350
+            },
+            {
+               "width" : 350,
+               "height" : 196,
+               "formats" : [
+                  {
+                     "href" : "http://static.siz.io/sequences/788798Y1112d.mp4",
+                     "type" : "mp4"
+                  }
+               ]
+            }
+         ],
+         "id" : "14217625935409c9a46d40cc",
+         "tags" : [
+            "meaningful-videos",
+            "news"
+         ],
+         "creationDate" : 1421762593540,
+         "slug" : "the-stand-up-kid",
+         "source" : {
+            "id" : "SE5Ip60_HJk",
+            "duration" : 187000,
+            "type" : "youtube"
+         },
+         "title" : "The stand up kid",
+         "href" : "/stories/14217625935409c9a46d40cc"
+      }
+   ]
+}
+```
+

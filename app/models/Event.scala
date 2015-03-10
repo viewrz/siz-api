@@ -6,7 +6,7 @@ import reactivemongo.api.indexes.{IndexType, Index}
 import reactivemongo.bson.BSONObjectID
 import scala.concurrent.ExecutionContext.Implicits.global
 
-case class NewEvent(storyId: String, _type: String, tags: List[String], date: Date)
+case class NewEvent(storyId: String, _type: String, date: Date)
 
 case class Event(storyId: String, _type: String, tags: List[String], viewerProfileId: String, id: String, date: Date = new Date()){
   lazy val tagsWeight = _type match {
@@ -18,10 +18,10 @@ case class Event(storyId: String, _type: String, tags: List[String], viewerProfi
 object Event extends MongoModel("events")
 {
   def ensureIndexes = {
-    collection.indexesManager.ensure(Index(Seq("storyId" -> IndexType.Ascending), name = Some("storyIdUniqueIndex"), unique = true, sparse = true))
+     collection.indexesManager.ensure(Index(Seq("storyId" -> IndexType.Ascending,"viewerProfileId" -> IndexType.Ascending), name = Some("storyIdViewerProfileIdUniqueIndex"), unique = true, sparse = true))
   }
 
-  def newEventToEvent(newEvent: NewEvent, viewerProfileId: String): Event = Event(newEvent.storyId,newEvent._type,newEvent.tags,viewerProfileId, BSONObjectID.generate.stringify)
+  def newEventToEvent(newEvent: NewEvent, viewerProfileId: String, tags: List[String]): Event = Event(newEvent.storyId,newEvent._type,tags,viewerProfileId, BSONObjectID.generate.stringify)
 
   def addEvent(event: Event) = collection.insert(event)
 
