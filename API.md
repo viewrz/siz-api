@@ -39,6 +39,7 @@ X-Access-Token: J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
 ## Notes
 - password is a sha256(password+salt)
 - password is not stored the same way as it's received :)
+- you can create only one user per token
 
 ## Results
 ```json
@@ -123,6 +124,7 @@ X-Access-Token: J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
 ```
 ## Notes
 - email and username are optional
+- you can create only one user per token
 
 ## Results
 ```json
@@ -182,6 +184,9 @@ X-Access-Token: J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
 }
 ```
 
+## Notes
+- you can only login one user per token
+
 ## Results
 ```json
 HTTP/1.1 200 OK
@@ -238,6 +243,9 @@ X-Access-Token: J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
 }
 ```
 
+## Notes
+- you can only login one user per token
+
 ## Results
 ```json
 HTTP/1.1 200 OK
@@ -292,6 +300,9 @@ X-Access-Token: J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
   }
 }
 ```
+
+## Notes
+- you can only login one user per token
 
 ## Results
 ```json
