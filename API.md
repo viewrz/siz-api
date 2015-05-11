@@ -125,6 +125,7 @@ X-Access-Token: J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
 ## Notes
 - email and username are optional
 - you can create only one user per token
+- the user is automaticaly logged when created
 
 ## Results
 ```json
