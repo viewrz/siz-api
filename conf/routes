@@ -9,6 +9,7 @@ GET     /users/:id                         controllers.Users.get(id)
 POST    /tokens                            controllers.Tokens.createDispatcher
 PUT     /tokens/:id                        controllers.Tokens.updateDispatcher(id)
 GET     /emails/:email                     controllers.Users.checkEmail(email)
+GET     /usernames/:username               controllers.Users.checkUsername(username)
 GET     /stories                           controllers.Stories.dispatcher(limit: Int ?= 12, orderBy: String ?= "creationDate", filterBy: String ?= "recommends", slug: Option[String] ?= None, sinceId: Option[String] ?= None, lastSkippedId: Option[String] ?= None)
 GET     /stories/$id<[0-9a-z]{24}>         controllers.Stories.getById(id)
 POST    /events                            controllers.Events.create
