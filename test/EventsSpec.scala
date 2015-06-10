@@ -32,7 +32,7 @@ class EventsSpec extends Specification {
 
       val createdEvent = route(FakeRequest(POST, "/events").withHeaders(("X-Access-Token",(createdToken \ "tokens" \ "id").as[String])).withJsonBody(jsonBody)).get
 
-      status(createdEvent) must equalTo(NO_CONTENT)
+      status(createdEvent) must equalTo(CREATED)
       contentType(createdEvent) must beNone
     }
   }
