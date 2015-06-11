@@ -34,6 +34,10 @@ class EventsSpec extends Specification {
 
       status(createdEvent) must equalTo(CREATED)
       contentType(createdEvent) must  beSome.which(_ == "application/json")
+      val jsonEvent = contentAsJson(createdEvent) \ "events"
+      jsonEvent \ "tags" mustEqual JsArray(List(JsString("short-films")))
+      jsonEvent \ "storyId" mustEqual JsString(storyId)
+      jsonEvent \ "type" mustEqual JsString("like")
     }
   }
 }
