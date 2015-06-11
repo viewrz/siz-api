@@ -13,6 +13,7 @@ object Application extends Controller with APIJsonFormats {
       val root = "https://"+request.host
       val services = Map("users" -> s"$root/users",
         "emails" -> s"$root/emails",
+        "usernames" -> s"$root/usernames",
         "tokens" -> s"$root/tokens",
         "stories" -> s"$root/stories"
       )
