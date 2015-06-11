@@ -20,15 +20,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
   end
 
-  config.vm.define "rethinkdb" do |rethinkdb|
-    rethinkdb.vm.provider "docker" do |d|
-      d.image = "jdauphant/rethinkdb:1.11.3"
-      d.name = "siz-api-rethinkdb"
-      d.ports = ["8080:8080"]
-      d.cmd = ["rethinkdb","--bind","all"]
-    end
-  end
-
   config.vm.define "siz-api" do |siz_api|
     siz_api.vm.synced_folder ".", "/var/www/siz-api"
 

@@ -17,6 +17,7 @@ object Application extends Controller with APIJsonFormats {
         "tokens" -> s"$root/tokens",
         "stories" -> s"$root/stories"
       )
+      
       Ok(Json.toJson(TopLevel(links = Some(services))))
     }
   }
