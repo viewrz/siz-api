@@ -8,6 +8,9 @@ POST /tokens
 {}
 ```
 
+## Notes
+- You need to provide a json in all call, event if it's an empty json
+
 ## Results
 ```json
 HTTP/1.1 201 Created
