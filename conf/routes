@@ -4,6 +4,7 @@
 
 # Home page
 GET     /                                  controllers.Application.index
+GET     /api/health                        controllers.Application.health
 POST    /users                             controllers.Users.createDispatcher
 GET     /users/:id                         controllers.Users.get(id)
 POST    /tokens                            controllers.Tokens.createDispatcher

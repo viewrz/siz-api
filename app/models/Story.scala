@@ -27,7 +27,7 @@ case class Story(boxes: List[Box],
                  tags: List[String])
 
 object Story extends MongoModel("stories"){
-  def findRecommends(limit: Int, orderBy: String, exceptStoryIds: List[String] = List(), exceptTags: List[String] = List()) =
+  def findRecommends(limit: Int, orderBy: String = "creationDate", exceptStoryIds: List[String] = List(), exceptTags: List[String] = List()) =
       collection.find(Json.obj("_id" ->  Json.obj("$nin" -> exceptStoryIds.map(id => Json.obj("$oid" -> id))),
                                "tags" -> Json.obj("$not" -> Json.obj("$elemMatch" -> Json.obj("$in" -> exceptTags)))
       )).options(QueryOpts().batchSize(limit)).sort( Json.obj(orderBy -> -1) ).cursor[Story].collect[List](limit)
