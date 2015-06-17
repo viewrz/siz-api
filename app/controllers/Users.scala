@@ -132,6 +132,16 @@ object Users extends Controller with APIJsonFormats {
       }
   }
 
+  def checkUsername(username: String) = LoggingAction{
+    Action.async { request =>
+      User.findByUsername(username).map {
+        case User(_, _, _, Some(`username`), _, _, _, _) :: Nil =>
+          Ok(Json.toJson(TopLevel(usernames = Some(Left(Username(username, "registered"))))))
+        case _ =>
+          NotFound(Error.toTopLevelJson(Error("Username not found")))
+      }
+    }
+  }
 
   def retrieveFacebookUserId(facebookToken: String): Future[String] = {
     implicit val system = Akka.system
