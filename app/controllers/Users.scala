@@ -169,9 +169,9 @@ object Users extends Controller with APIJsonFormats {
             Ok(Json.toJson(TopLevel(users = Some(users.head), tokens= Some(token))))
         )
       case User(Some(`email`), None, _, _, Some(_), Some(_), _, _) :: Nil =>
-        Future.successful(Unauthorized(Error.toTopLevelJson(Error("User logged by facebook"))))
+        Future.successful(BadRequest(Error.toTopLevelJson(Error("User don't have password"))))
       case User(Some(`email`), _, _, _, _, _, _, _) :: Nil =>
-        Future.successful(Unauthorized(Error.toTopLevelJson(Error("Incorrect password"))))
+        Future.successful(NotFound(Error.toTopLevelJson(Error("Incorrect password"))))
       case _ =>
         Future.successful(NotFound(Error.toTopLevelJson(Error("No user account for this email"))))
     }
@@ -185,9 +185,9 @@ object Users extends Controller with APIJsonFormats {
             Ok(Json.toJson(TopLevel(users = Some(users.head), tokens= Some(token))))
         )
       case User(_, None, _, Some(`username`), Some(_), Some(_), _, _) :: Nil =>
-        Future.successful(Unauthorized(Error.toTopLevelJson(Error("User registered by facebook"))))
+        Future.successful(BadRequest(Error.toTopLevelJson(Error("User don't have password"))))
       case User(_, _, _, Some(`username`), _, _, _, _) :: Nil =>
-        Future.successful(Unauthorized(Error.toTopLevelJson(Error("Incorrect password"))))
+        Future.successful(NotFound(Error.toTopLevelJson(Error("Incorrect password"))))
       case _ =>
         Future.successful(NotFound(Error.toTopLevelJson(Error("No user account for this username"))))
     }
@@ -210,11 +210,11 @@ object Users extends Controller with APIJsonFormats {
         }
     }.recover {
       case exception: FacebookException if exception.exceptionType == "OAuthException" =>
-        Unauthorized(Error.toTopLevelJson(Error("Invalid facebook access token")))
+        NotFound(Error.toTopLevelJson(Error("Invalid facebook access token")))
       case InvalidAccessTokenException(_,_,_,_) =>
-        Unauthorized(Error.toTopLevelJson(Error("Invalid facebook access token")))
+        NotFound(Error.toTopLevelJson(Error("Invalid facebook access token")))
       case AccessTokenExpiredException(_,_,_,_) =>
-        Unauthorized(Error.toTopLevelJson(Error("Expired facebook access token")))
+        NotFound(Error.toTopLevelJson(Error("Expired facebook access token")))
     }
   }
 
