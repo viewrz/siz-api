@@ -27,10 +27,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       d.image = "jdauphant/siz-api"
       d.name = "siz-api"
       d.link("siz-api-mongo:mongo")
-      d.link("siz-api-rethinkdb:rethinkdb")
+      d.env = { "MONGODB_URI" =>  "mongodb://mongo:27017/siz" }
       d.ports = ["9000:9000"]
       d.create_args = ["-t"]
-      d.cmd = ["sbt", "run", "-Dmongodb.uri=mongodb://mongo:27017/siz"]
+      d.cmd = ["sbt", "run"]
     end
   end
 end
