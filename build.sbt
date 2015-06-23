@@ -23,3 +23,8 @@ libraryDependencies ++= Seq(
 )
 
 scalacOptions ++= Seq("-unchecked", "-deprecation","-feature")
+
+// Pidfile add problem when docker try to restart
+javaOptions in Universal ++= Seq(
+  "-Dpidfile.path=/dev/null"
+)
