@@ -785,3 +785,113 @@ Content-Type: application/json
 }
 ```
 
+# Generate new story
+## Request
+
+```json
+POST /stories
+X-Access-Token: fuEyvqImw2xbywewZAUHkFMo8xJO7eSOAOjkaRRSTTfzRTqdblN65Mx7O2JhmzVc
+{   "stories" : [
+        {
+            "boxes": [
+                {
+                    "height": 196,
+                    "width": 350,
+                    "start": 2125,
+                    "stop": 9500
+                },
+                {
+                    "height": 196,
+                    "width": 350,
+                    "start": 15000,
+                    "stop": 20375
+                },
+                {
+                    "height": 196,
+                    "width": 350,
+                    "start": 27000,
+                    "stop": 31625
+                },
+                {
+                    "height": 196,
+                    "width": 350,
+                    "start": 35750,
+                    "stop": 42375
+                }
+            ],
+            "slug": "introduce-tree-book-tree",
+            "source": {
+                "id": "xgy2a9tFSPU",
+                "duration": 119000,
+                "type": "youtube"
+            },
+            "picture": {
+                "href": "//img.youtube.com/vi/xgy2a9tFSPU/0.jpg"
+            },
+            "title": "Introduce Tree Book Tree",
+            "tags": [
+                "meaningful-videos",
+                "news"
+            ]
+        }
+    ]
+}
+```
+
+## Results
+
+```json
+{
+    "stories": [
+        {
+            "boxes": [
+                {
+                    "height": 196,
+                    "width": 350,
+                    "start": 2125,
+                    "stop": 9500,
+                    "formats": []
+                },
+                {
+                    "height": 196,
+                    "width": 350,
+                    "start": 15000,
+                    "stop": 20375,
+                    "formats": []
+                },
+                {
+                    "height": 196,
+                    "width": 350,
+                    "start": 27000,
+                    "stop": 31625,
+                    "formats": []
+                },
+                {
+                    "height": 196,
+                    "width": 350,
+                    "start": 35750,
+                    "stop": 42375,
+                    "formats": []
+                }
+            ],
+            "creationDate": 1435185344038,
+            "id": "558b30c06a00007b000f3176",
+            "slug": "introduce-tree-book-tree",
+            "source": {
+                "id": "xgy2a9tFSPU",
+                "duration": 119000,
+                "type": "youtube"
+            },
+            "picture": {
+                "href": "http://img.youtube.com/vi/xgy2a9tFSPU/0.jpg"
+            },
+            "title": "Introduce Tree Book Tree",
+            "tags": [
+                "meaningful-videos",
+                "news"
+            ],
+            "href": "/stories/558b30c06a00007b000f3176"
+        }
+    ]
+}
+```
