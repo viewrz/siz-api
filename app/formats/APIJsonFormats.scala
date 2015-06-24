@@ -65,6 +65,12 @@ trait APIJsonFormats extends CommonJsonFormats {
   )(LoginUser.apply _)
 
 
+  implicit val sourceRead = typeReads[Source](Json.reads[Source])
+
+  implicit val imageRead = Json.reads[Image]
+  implicit val newBoxRead = Json.reads[NewBox]
+  implicit val newStoryRead = Json.reads[NewStory]
+  
   implicit val eventWrite = typeWrites(Json.writes[Event])
   implicit val errorWrite = Json.writes[Error]
   implicit val emailWrite = addHref("emails",Json.writes[Email])
@@ -73,7 +79,7 @@ trait APIJsonFormats extends CommonJsonFormats {
   implicit val sourceWrite = typeWrites(Json.writes[Source])
   implicit val videoFormatWrite = addHttpToHref(typeWrites(Json.writes[VideoFormat]))
   implicit val imageWrite = addHttpToHref(Json.writes[Image])
-  implicit val boxesWrite = Json.writes[Box]
+  implicit val boxWrite = Json.writes[Box]
   implicit val storyWrite = addHref("stories",Json.writes[Story])
 
   implicit val topLevelWrite = Json.writes[TopLevel]
