@@ -24,7 +24,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     siz_api.vm.synced_folder ".", "/var/www/siz-api"
 
     siz_api.vm.provider "docker" do |d|
-      d.image = "jdauphant/siz-api"
+      d.image = "quay.io/sizio/siz-api"
       d.name = "siz-api"
       d.link("siz-api-mongo:mongo")
       d.env = { "MONGODB_URI" =>  "mongodb://mongo:27017/siz" }
