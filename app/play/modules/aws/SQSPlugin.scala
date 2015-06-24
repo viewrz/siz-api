@@ -47,7 +47,7 @@ object SQSPlugin {
   }
 
   private def parseConf(app: Application): AWSConf = {
-    val region = app.configuration.getString("aws.access.region").getOrElse("us-west-2")
+    val region = app.configuration.getString("aws.region").getOrElse("us-west-2")
     (app.configuration.getString("aws.access.key"), app.configuration.getString("aws.secret.key")) match {
       case (Some(accessKey), Some(secretKey)) =>
         AWSConf(accessKey,secretKey,Regions.fromName(region))
