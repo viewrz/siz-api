@@ -3,6 +3,7 @@ package play.modules.aws
 import play.api._
 import com.kifi.franz._
 import com.amazonaws.regions.Regions
+import play.api.libs.json.JsValue
 
 import scala.concurrent.ExecutionContext
 import scala.util.control.NonFatal
@@ -27,8 +28,18 @@ class SQSPlugin(app: Application) extends Plugin {
 }
 
 object SQSPlugin {
-
   case class AWSConf(accessKey: String, secretKey: String, region: Regions)
+
+  private def client(implicit app: Application) = current.helper.client
+
+  def json(queueConfigName: String)(implicit app: Application): SQSQueue[JsValue] = {
+    app.configuration.getString(queueConfigName) match {
+      case Some(queueName) =>
+        client.json(QueueName(queueName))
+      case _ =>
+        throw new PlayException("SQSPlugin Error", "Queue %s don't exits in configuration")
+    }
+  }
 
   def current(implicit app: Application): SQSPlugin = app.plugin[SQSPlugin] match {
     case Some(plugin) => plugin
