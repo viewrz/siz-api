@@ -224,7 +224,7 @@ Content-Type: application/json
 }
 ```
 ```json
-HTTP/1.1 401 Unauthorized
+HTTP/1.1 404 Not Found
 Content-Type: application/json
 
 {
@@ -283,7 +283,7 @@ Content-Type: application/json
 }
 ```
 ```json
-HTTP/1.1 401 Unauthorized
+HTTP/1.1 404 Not Found
 Content-Type: application/json
 
 {
@@ -408,7 +408,7 @@ Content-Type: application/json
 }
 ```
 ```json
-HTTP/1.1 401 Unauthorized
+HTTP/1.1 404 Not Found
 Content-Type: application/json
 
 {
