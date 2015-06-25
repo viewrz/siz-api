@@ -376,6 +376,39 @@ Content-Type: application/json
 }
 ```
 
+# Check if an username is already used
+## Request
+
+```
+GET /usernames/paul1
+X-Access-Token: J1WAnckPPHm8jX8Abvc61VvVBY1cmqCnGSr46oUqvOY0MUsO4u0dhWlGipHHZaje
+```
+
+## Results
+
+```json
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+    "usernames": {
+       "id" : "paul1",
+       "state" : "registered"
+    }
+}
+```
+
+```json
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+   "errors": {
+      "title":"Username not found"
+   }
+}
+```
+
 # Retrieve user information
 ## Request
 ```
