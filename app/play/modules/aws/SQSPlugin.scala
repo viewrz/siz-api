@@ -7,6 +7,7 @@ import play.api.libs.json.JsValue
 
 import scala.concurrent.ExecutionContext
 import scala.util.control.NonFatal
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 class SQSPlugin(app: Application) extends Plugin {
   private var _helper: Option[SQSHelper] = None
@@ -32,13 +33,8 @@ object SQSPlugin {
 
   private def client(implicit app: Application) = current.helper.client
 
-  def json(queueConfigName: String)(implicit app: Application): SQSQueue[JsValue] = {
-    app.configuration.getString(queueConfigName) match {
-      case Some(queueName) =>
-        client.json(QueueName(queueName))
-      case _ =>
-        throw new PlayException("SQSPlugin Error", "Queue %s don't exits in configuration")
-    }
+  def json(queueName: String)(implicit app: Application): SQSQueue[JsValue] = {
+    client.json(QueueName(queueName))
   }
 
   def current(implicit app: Application): SQSPlugin = app.plugin[SQSPlugin] match {

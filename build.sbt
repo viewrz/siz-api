@@ -20,7 +20,8 @@ libraryDependencies ++= Seq(
   "org.mindrot"       %  "jbcrypt"              % "0.3m",
   "io.spray"          %% "spray-client"         % "1.3.2",
   "io.spray"          %% "spray-json"           % "1.3.1",
-  "com.kifi"          %% "franz"                % "0.3.10"
+  "com.kifi"          %% "franz"                % "0.3.10",
+  ws
 )
 
 scalacOptions ++= Seq("-unchecked", "-deprecation","-feature")
