@@ -4,6 +4,7 @@ import actions.{LoggingAction, TokenCheckAction}
 import formats.APIJsonFormats
 
 import models._
+import play.api.Logger
 import play.api.mvc._
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -17,7 +18,7 @@ object Stories extends Controller with APIJsonFormats {
     TokenCheckAction.async { request =>
       slug match {
         case None =>
-          find(limit, orderBy, request.token.viewerProfileId, request.token.userId != None, filterBy, sinceId, lastSkippedId)
+          find(limit, orderBy, request.token.viewerProfileId, request.token.userId.isDefined, filterBy, sinceId, lastSkippedId)
         case Some(slug) =>
           getBySlug(slug)
       }
@@ -44,11 +45,11 @@ object Stories extends Controller with APIJsonFormats {
           case "likes" =>
             val allIds = viewerProfile.likeStoryIds.reverse
             val ids = (lastSkippedId,sinceId) match {
-              case (Some(lastSkippedId),None) =>
+              case (Some(_),None) =>
                 allIds.dropWhile(_!=lastSkippedId).tail.take(limit)
-              case (Some(lastSkippedId),Some(sinceId)) =>
+              case (Some(_),Some(_)) =>
                 allIds.dropWhile(_!=lastSkippedId).tail.take(limit).takeWhile(_!=sinceId)
-              case (None,Some(sinceId)) =>
+              case (None,Some(_)) =>
                 allIds.take(limit).takeWhile(_!=sinceId)
               case (None,None) =>
                 allIds.take(limit)
@@ -88,4 +89,22 @@ object Stories extends Controller with APIJsonFormats {
         Ok(Json.toJson(TopLevel(stories = Some(Left(story)))))
     }
 
+  def generateStories() = LoggingAction {
+    TokenCheckAction.async(BodyParsers.parse.tolerantJson) { request =>
+      val storiesResult = (request.body \ "stories").validate[List[NewStory]]
+      storiesResult.fold(
+        validationErrors => {
+          Future.successful(BadRequest(Error.toTopLevelJson(validationErrors)))
+        }, {
+          case newStory :: nil =>
+            Story.generateStory(newStory).flatMap {
+              story =>
+                Future.successful(Ok(Json.toJson(TopLevel(stories = Some(Right(List(story)))))))
+            }
+          case _ =>
+            Future.successful(BadRequest(Error.toTopLevelJson(s"Create more that 1 story is not supported wet")))
+        }
+      )
+    }
+  }
 }

@@ -818,3 +818,87 @@ Content-Type: application/json
 }
 ```
 
+# Generate new story
+## Request
+
+```json
+POST /stories
+X-Access-Token: fuEyvqImw2xbywewZAUHkFMo8xJO7eSOAOjkaRRSTTfzRTqdblN65Mx7O2JhmzVc
+{   "stories" : [
+        {
+            "boxes": [
+                {
+                    "start": 2125,
+                    "stop": 9500
+                },
+                {
+                    "start": 15000,
+                    "stop": 20375
+                },
+                {
+                    "start": 27000,
+                    "stop": 31625
+                },
+                {
+                    "start": 35750,
+                    "stop": 42375
+                }
+            ],
+            "source": {
+                "id": "xgy2a9tFSPU",
+                "type": "youtube"
+            },
+            "title": "Introduce Tree Book Tree",
+            "tags": [
+                "meaningful-videos",
+                "news"
+            ]
+        }
+    ]
+}
+```
+
+## Results
+
+```json
+{
+    "stories": [
+        {
+            "boxes": [
+                {
+                    "start": 2125,
+                    "stop": 9500,
+                },
+                {
+                    "start": 15000,
+                    "stop": 20375,
+                },
+                {
+                    "start": 27000,
+                    "stop": 31625,
+                },
+                {
+                    "start": 35750,
+                    "stop": 42375,
+                }
+            ],
+            "creationDate": 1435185344038,
+            "id": "558b30c06a00007b000f3176",
+            "slug": "introduce-tree-book-tree",
+            "source": {
+                "id": "xgy2a9tFSPU",
+                "type": "youtube"
+            },
+            "picture": {
+                "href": "http://img.youtube.com/vi/xgy2a9tFSPU/0.jpg"
+            },
+            "title": "Introduce Tree Book Tree",
+            "tags": [
+                "meaningful-videos",
+                "news"
+            ],
+            "href": "/stories/558b30c06a00007b000f3176"
+        }
+    ]
+}
+```
