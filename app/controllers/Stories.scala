@@ -45,11 +45,11 @@ object Stories extends Controller with APIJsonFormats {
           case "likes" =>
             val allIds = viewerProfile.likeStoryIds.reverse
             val ids = (lastSkippedId,sinceId) match {
-              case (Some(_),None) =>
+              case (Some(lastSkippedId),None) if allIds.contains(lastSkippedId) =>
                 allIds.dropWhile(_!=lastSkippedId).tail.take(limit)
-              case (Some(_),Some(_)) =>
+              case (Some(lastSkippedId),Some(sinceId)) if allIds.contains(lastSkippedId) =>
                 allIds.dropWhile(_!=lastSkippedId).tail.take(limit).takeWhile(_!=sinceId)
-              case (None,Some(_)) =>
+              case (None,Some(sinceId)) =>
                 allIds.take(limit).takeWhile(_!=sinceId)
               case (None,None) =>
                 allIds.take(limit)
