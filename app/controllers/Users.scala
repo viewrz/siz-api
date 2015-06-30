@@ -169,7 +169,7 @@ object Users extends Controller with APIJsonFormats {
             Ok(Json.toJson(TopLevel(users = Some(users.head), tokens= Some(token))))
         )
       case User(Some(`email`), None, _, _, Some(_), Some(_), _, _) :: Nil =>
-        Future.successful(BadRequest(Error.toTopLevelJson(Error("User don't have password"))))
+        Future.successful(BadRequest(Error.toTopLevelJson(Error("User doesn't have a password"))))
       case User(Some(`email`), _, _, _, _, _, _, _) :: Nil =>
         Future.successful(NotFound(Error.toTopLevelJson(Error("Incorrect password"))))
       case _ =>
@@ -185,7 +185,7 @@ object Users extends Controller with APIJsonFormats {
             Ok(Json.toJson(TopLevel(users = Some(users.head), tokens= Some(token))))
         )
       case User(_, None, _, Some(`username`), Some(_), Some(_), _, _) :: Nil =>
-        Future.successful(BadRequest(Error.toTopLevelJson(Error("User don't have password"))))
+        Future.successful(BadRequest(Error.toTopLevelJson(Error("User doesn't have a password"))))
       case User(_, _, _, Some(`username`), _, _, _, _) :: Nil =>
         Future.successful(NotFound(Error.toTopLevelJson(Error("Incorrect password"))))
       case _ =>
