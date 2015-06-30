@@ -8,13 +8,14 @@ import scala.concurrent.Future
 
 object Global extends WithFilters(CORSFilter) with GlobalSettings {
 
-  def ensureMongoIndexes = {
-    User.ensureIndexes
-    Event.ensureIndexes
+  def updateDB = {
+    User.updateDB
+    Event.updateDB
+    Story.updateDB
   }
 
   override def onStart(app: Application): Unit = {
-    ensureMongoIndexes
+    updateDB
   }
 
   override def onBadRequest(request: RequestHeader, error: String) = {

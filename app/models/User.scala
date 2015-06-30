@@ -25,7 +25,7 @@ case class LoginUser(email: Option[String],
                      facebookToken: Option[String])
 
 object User extends MongoModel("users") {
-  def ensureIndexes = {
+  def updateDB = {
     collection.indexesManager.ensure(Index(Seq("email" -> IndexType.Ascending), name = Some("emailUniqueIndex"), unique = true, sparse = true))
     collection.indexesManager.ensure(Index(Seq("username" -> IndexType.Ascending), name = Some("usernameUniqueIndex"), unique = true, sparse = true))
     collection.indexesManager.ensure(Index(Seq("facebookUserId" -> IndexType.Ascending), name = Some("facebookUserIdUniqueIndex"), unique = true, sparse = true))
