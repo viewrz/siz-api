@@ -1,19 +1,18 @@
-package play.modules.queue
-
-import play.api.{PlayException, Application}
-import play.api.libs.json.JsValue
-import play.modules.aws.SQSPlugin
+package utils
 
 import play.api.Play.current
-import play.api.libs.ws._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import play.api.libs.json.JsValue
+import play.api.libs.ws._
+import play.api.{Application, PlayException}
+import play.modules.aws.SQSPlugin
 
-object QueuePlugin {
+object Queue {
   private val SQS_REGEX = "sqs://.*"
   private val POST_REGEX = "https?://.*"
 
   private def sendToSQSQueue(url: String, message: JsValue) = SQSPlugin.json(url.replace("sqs://","")).send(message).map {
-    _ =>
+    _ => true
   }.recover {
     case _ => false
   }

@@ -3,13 +3,12 @@ package models
 import java.util.Date
 
 import play.api.PlayException
-import play.modules.queue.QueuePlugin
 import reactivemongo.api.QueryOpts
 import reactivemongo.bson.BSONObjectID
 import play.api.libs.json.Json
 import play.modules.reactivemongo.json.ImplicitBSONHandlers._
 import play.api.Play.current
-import utils.Slug
+import utils.{Queue, Slug}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -94,7 +93,7 @@ object Story extends MongoModel("stories") {
   def generateStory(newStory: NewStory) = {
     generateValidSlug(newStory.title).flatMap { slug =>
       val story = newStoryToStory(newStory, slug)
-      QueuePlugin.send("generate.story", Json.toJson(story)).map(_ => story)
+      Queue.send("generate.story", Json.toJson(story)).map(_ => story)
     }
   }
 }
