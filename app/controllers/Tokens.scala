@@ -41,7 +41,7 @@ object Tokens extends Controller with APIJsonFormats {
       Created(Json.toJson(TopLevel(tokens = Some(token))))
   }
 
-  // V1.0 compatibility
+  // V1.0 and V1.1
   def updateDispatcher(tokenId: String) = LoggingAction {
     TokenCheckAction.async(BodyParsers.parse.tolerantJson) { request =>
       request.token.userId match {
@@ -67,7 +67,7 @@ object Tokens extends Controller with APIJsonFormats {
         case LoginUser(None, None, None, Some(facebookToken)) =>
           Users.loginByFacebook(facebookToken)(token)
         case _ =>
-          Future.successful(BadRequest(Error.toTopLevelJson(s"You have nothing to specified to create a token")))
+          Future.successful(BadRequest(Error.toTopLevelJson(s"Missing fields to login")))
       }
     )
   }
