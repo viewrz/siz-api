@@ -2,8 +2,10 @@ package models
 
 import java.util.Date
 
+import models.Event._
 import play.api.PlayException
 import reactivemongo.api.QueryOpts
+import reactivemongo.api.indexes.{IndexType, Index}
 import reactivemongo.bson.BSONObjectID
 import play.api.libs.json.Json
 import play.modules.reactivemongo.json.ImplicitBSONHandlers._
@@ -35,7 +37,8 @@ case class Story(boxes: List[Box],
                  source: Source,
                  picture: Image,
                  title: String,
-                 tags: List[String])
+                 tags: List[String],
+                 listed: Boolean)
 
 case class NewStory(boxes: List[NewBox],
                  source: Source,
@@ -43,9 +46,15 @@ case class NewStory(boxes: List[NewBox],
                  tags: List[String])
 
 object Story extends MongoModel("stories") {
+  def updateDB = {
+    collection.indexesManager.ensure(Index(Seq("slug" -> IndexType.Ascending,"slug" -> IndexType.Ascending), name = Some("slugUniqueIndex"), unique = true))
+    collection.update(Json.obj("listed" -> Json.obj("$exists" -> false)), Json.obj("$set" -> Json.obj("listed" -> true)),multi = true)
+  }
+
   def findRecommends(limit: Int, orderBy: String = "creationDate", exceptStoryIds: List[String] = List(), exceptTags: List[String] = List()) =
       collection.find(Json.obj("_id" ->  Json.obj("$nin" -> exceptStoryIds.map(id => Json.obj("$oid" -> id))),
-                               "tags" -> Json.obj("$not" -> Json.obj("$elemMatch" -> Json.obj("$in" -> exceptTags)))
+                               "tags" -> Json.obj("$not" -> Json.obj("$elemMatch" -> Json.obj("$in" -> exceptTags))),
+                                "listed" -> Json.obj("$ne" -> false)
       )).options(QueryOpts().batchSize(limit)).sort( Json.obj(orderBy -> -1) ).cursor[Story].collect[List](limit)
   def getByIds(ids: List[String]) =
       collection.find(Json.obj("_id" ->  Json.obj("$in" -> ids.map(id => Json.obj("$oid" -> id))))).cursor[Story].collect[List]()
@@ -66,7 +75,8 @@ object Story extends MongoModel("stories") {
       source = newStory.source,
       picture = pictureFromSource(newStory.source),
       title = newStory.title,
-      tags = newStory.tags)
+      tags = newStory.tags,
+      listed = false)
 
   def getBySlug(slug: String) = collection.find(Json.obj("slug" -> slug)).cursor[Story].collect[List]().map(_.headOption)
   def getById(id: String) = collection.find(Json.obj("_id" -> Json.obj("$oid" -> id))).cursor[Story].collect[List]().map(_.headOption)
