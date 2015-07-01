@@ -16,7 +16,7 @@ class EventsSpec extends Specification {
       val newStory = Story(boxes = List(), creationDate = new Date(), id = storyId,
         slug = "pepper-spray", source = Source("9dLmdVDjg1w","youtube",Some(1592000)), picture = Image("http://img.youtube.com/vi/9dLmdVDjg1w/0.jpg"), title = "Pepper Spray",
         tags = List("short-films"),
-        listed = false)
+        privacy = "unlisted")
       Story.collection.insert(newStory)
 
       val jsonBody: JsValue = JsObject(
