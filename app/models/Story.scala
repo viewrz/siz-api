@@ -40,7 +40,7 @@ case class Story(boxes: List[Box],
                  title: String,
                  tags: List[String],
                  loop: Option[Loop] = None,
-                 listed: Boolean)
+                 privacy: String)
 
 case class NewStory(boxes: List[NewBox],
                  source: Source,
@@ -50,13 +50,13 @@ case class NewStory(boxes: List[NewBox],
 object Story extends MongoModel("stories") {
   def updateDB = {
     collection.indexesManager.ensure(Index(Seq("slug" -> IndexType.Ascending,"slug" -> IndexType.Ascending), name = Some("slugUniqueIndex"), unique = true))
-    collection.update(Json.obj("listed" -> Json.obj("$exists" -> false)), Json.obj("$set" -> Json.obj("listed" -> true)),multi = true)
+    collection.update(Json.obj("privacy" -> Json.obj("$exists" -> false)), Json.obj("$set" -> Json.obj("privacy" -> "public")),multi = true)
   }
 
   def findRecommends(limit: Int, orderBy: String = "creationDate", exceptStoryIds: List[String] = List(), exceptTags: List[String] = List()) =
       collection.find(Json.obj("_id" ->  Json.obj("$nin" -> exceptStoryIds.map(id => Json.obj("$oid" -> id))),
                                "tags" -> Json.obj("$not" -> Json.obj("$elemMatch" -> Json.obj("$in" -> exceptTags))),
-                                "listed" -> Json.obj("$ne" -> false)
+                                "privacy" -> Json.obj("$nin" -> Json.arr(List("unlisted","private")))
       )).options(QueryOpts().batchSize(limit)).sort( Json.obj(orderBy -> -1) ).cursor[Story].collect[List](limit)
   def getByIds(ids: List[String]) =
       collection.find(Json.obj("_id" ->  Json.obj("$in" -> ids.map(id => Json.obj("$oid" -> id))))).cursor[Story].collect[List]()
@@ -79,7 +79,7 @@ object Story extends MongoModel("stories") {
       title = newStory.title,
       tags = newStory.tags,
       loop = None,
-      listed = false)
+      privacy = "unlisted")
 
   def getBySlug(slug: String) = collection.find(Json.obj("slug" -> slug)).cursor[Story].collect[List]().map(_.headOption)
   def getById(id: String) = collection.find(Json.obj("_id" -> Json.obj("$oid" -> id))).cursor[Story].collect[List]().map(_.headOption)
