@@ -20,14 +20,22 @@ object ViewerProfile extends MongoModel("viewerprofiles")
       ViewerProfile(id)
   }
 
-  def processEvent(event: Event) =
+  def processEvent(event: Event) = {
+    val update = if(event.tags.nonEmpty) {
+      Json.obj(
+        "$addToSet" -> Json.obj(event._type + "StoryIds" -> event.storyId)
+      )
+    } else {
+      Json.obj(
+        "$addToSet" -> Json.obj(event._type + "StoryIds" -> event.storyId),
+        "$inc" -> JsObject(event.tags.map(tag => ("tagsWeights." + tag, JsNumber(event.tagsWeight))))
+      )
+    }
     collection.update(
       Json.obj("_id" -> Json.obj("$oid" -> event.viewerProfileId)),
-      Json.obj(
-        "$addToSet" -> Json.obj(event._type+"StoryIds" -> event.storyId),
-        "$inc" -> JsObject(event.tags.map(tag => ("tagsWeights."+tag, JsNumber(event.tagsWeight))))
-      ),
+      update,
       multi = false,
       upsert = true
     )
+  }
 }
