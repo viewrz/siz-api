@@ -21,7 +21,7 @@ object ViewerProfile extends MongoModel("viewerprofiles")
   }
 
   def processEvent(event: Event) = {
-    val update = if(event.tags.nonEmpty) {
+    val update = if(event.tags.isEmpty) {
       Json.obj(
         "$addToSet" -> Json.obj(event._type + "StoryIds" -> event.storyId)
       )
