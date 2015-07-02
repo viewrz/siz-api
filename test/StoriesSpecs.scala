@@ -25,7 +25,7 @@ class StoriesSpec extends Specification {
       val retrievedStory = route(FakeRequest(GET, s"/stories/$storyId").
         withHeaders(("X-Access-Token",(createdToken \ "tokens" \ "id").as[String]))).get
 
-      status(retrievedStory) must equalTo(CREATED)
+      status(retrievedStory) must equalTo(OK)
       contentType(retrievedStory) must  beSome.which(_ == "application/json")
       val jsonEvent = contentAsJson(retrievedStory) \ "stories"
       jsonEvent \ "id" mustEqual JsString(storyId)
