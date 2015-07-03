@@ -6,9 +6,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
-case class ViewerProfile(id: String, likeStoryIds: List[String] = List(), nopeStoryIds: List[String] = List(), tagsWeights: Map[String,Int] = Map())
+case class ViewerProfile(id: String, likeStoryIds: List[String] = List(), nopeStoryIds: List[String] = List(), tagsWeights: Option[Map[String,Int]] = None)
 {
-  def tagsFilterBy(filter: ((String,Int)) => (Boolean)) = this.tagsWeights.filter(filter).map(_._1).toList
+  def tagsFilterBy(filter: ((String,Int)) => (Boolean)) = this.tagsWeights.map(_.filter(filter).map(_._1).toList).getOrElse(List())
 }
 
 object ViewerProfile extends MongoModel("viewerprofiles")
