@@ -6,9 +6,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
-case class ViewerProfile(id: String, likeStoryIds: List[String] = List(), nopeStoryIds: List[String] = List(), tagsWeights: Map[String,Int] = Map())
+case class ViewerProfile(id: String, likeStoryIds: List[String] = List(), nopeStoryIds: List[String] = List(), tagsWeights: Option[Map[String,Int]] = None)
 {
-  def tagsFilterBy(filter: ((String,Int)) => (Boolean)) = this.tagsWeights.filter(filter).map(_._1).toList
+  def tagsFilterBy(filter: ((String,Int)) => (Boolean)) = this.tagsWeights.map(_.filter(filter).map(_._1).toList).getOrElse(List())
 }
 
 object ViewerProfile extends MongoModel("viewerprofiles")
@@ -20,14 +20,22 @@ object ViewerProfile extends MongoModel("viewerprofiles")
       ViewerProfile(id)
   }
 
-  def processEvent(event: Event) =
+  def processEvent(event: Event) = {
+    val update = if(event.tags.isEmpty) {
+      Json.obj(
+        "$addToSet" -> Json.obj(event._type + "StoryIds" -> event.storyId)
+      )
+    } else {
+      Json.obj(
+        "$addToSet" -> Json.obj(event._type + "StoryIds" -> event.storyId),
+        "$inc" -> JsObject(event.tags.map(tag => ("tagsWeights." + tag, JsNumber(event.tagsWeight))))
+      )
+    }
     collection.update(
       Json.obj("_id" -> Json.obj("$oid" -> event.viewerProfileId)),
-      Json.obj(
-        "$addToSet" -> Json.obj(event._type+"StoryIds" -> event.storyId),
-        "$inc" -> JsObject(event.tags.map(tag => ("tagsWeights."+tag, JsNumber(event.tagsWeight))))
-      ),
+      update,
       multi = false,
       upsert = true
     )
+  }
 }
