@@ -42,6 +42,8 @@ trait MongoJsonFormats extends CommonJsonFormats {
   implicit val boxWrite = Json.writes[Box]
   implicit val sourceRead = typeReads[Source](Json.reads[Source])
   implicit val sourceWrite = typeWrites[Source](Json.writes[Source])
+  implicit val loopRead = Json.reads[Loop]
+  implicit val loopWrite = Json.writes[Loop]
   implicit val imageRead = Json.reads[Image]
   implicit val imageWrite = Json.writes[Image]
   implicit val storyRead = mongoReadsObjectId[Story](Json.reads[Story])

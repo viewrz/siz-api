@@ -78,6 +78,7 @@ trait APIJsonFormats extends CommonJsonFormats {
 
   implicit val sourceWrite = typeWrites(Json.writes[Source])
   implicit val videoFormatWrite = addHttpToHref(typeWrites(Json.writes[VideoFormat]))
+  implicit val loopWrite = Json.writes[Loop]
   implicit val imageWrite = addHttpToHref(Json.writes[Image])
   implicit val boxWrite = Json.writes[Box]
   implicit val storyWrite = addHref("stories",Json.writes[Story])
