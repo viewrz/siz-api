@@ -25,6 +25,7 @@ case class Box(height: Option[Int],
 case class NewBox(start: Long,
                stop: Long)
 case class Image(href: String)
+case class Loop(formats: List[VideoFormat])
 
 case class Source(id: String,
                   _type: String,
@@ -38,7 +39,8 @@ case class Story(boxes: List[Box],
                  picture: Image,
                  title: String,
                  tags: List[String],
-                 privacy: String)
+                 privacy: String,
+                 loop: Option[Loop] = None)
 
 case class NewStory(boxes: List[NewBox],
                  source: Source,
@@ -76,7 +78,8 @@ object Story extends MongoModel("stories") {
       picture = pictureFromSource(newStory.source),
       title = newStory.title,
       tags = newStory.tags,
-      privacy = "unlisted")
+      privacy = "unlisted",
+      loop = None)
 
   def getBySlug(slug: String) = collection.find(Json.obj("slug" -> slug)).cursor[Story].collect[List]().map(_.headOption)
   def getById(id: String) = collection.find(Json.obj("_id" -> Json.obj("$oid" -> id))).cursor[Story].collect[List]().map(_.headOption)
