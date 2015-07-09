@@ -5,6 +5,7 @@ import actions.{LoggingAction, TokenCheckAction}
 import akka.io.IO
 import akka.util.Timeout
 import akka.pattern.ask
+import models.User.UserName
 import play.api.libs.concurrent.Akka
 import spray.can.Http
 import spracebook.SprayClientFacebookGraphApi
@@ -121,24 +122,28 @@ object Users extends Controller with APIJsonFormats {
     }
   }
 
-  def checkEmail(email: String) = LoggingAction{
+  def checkEmail(email: User.Email) = LoggingAction{
       Action.async { request =>
         User.findByEmail(email).map {
-          case User(Some(`email`), _, _, _, _, _, _, _) :: Nil =>
-            Ok(Json.toJson(TopLevel(emails = Some(Left(Email(email, "registered"))))))
+            // match a list with a single user
+          case user :: Nil =>
+            Ok(Json.toJson(Map("emails" -> Email(email, "registered"))))
+            // match no result or a list bigger than one.
           case _ =>
             NotFound(Error.toTopLevelJson(Error("Email not found")))
         }
       }
   }
 
-  def checkUsername(username: String) = LoggingAction{
+  def checkUsername(username: UserName) = LoggingAction{
     Action.async { request =>
       User.findByUsername(username).map {
-        case User(_, _, _, Some(`username`), _, _, _, _) :: Nil =>
-          Ok(Json.toJson(TopLevel(usernames = Some(Left(Username(username, "registered"))))))
-        case _ =>
+        case user :: Nil =>
+          Ok(Json.toJson(Map("usernames" -> Username(username, "registered"))))
+        case Nil =>
           NotFound(Error.toTopLevelJson(Error("Username not found")))
+        case _ =>
+          throw new PlayException("User retrieval by username error", "More than one user found for username.")
       }
     }
   }
