@@ -125,7 +125,6 @@ object Users extends Controller with APIJsonFormats {
   def checkEmail(email: User.Email) = LoggingAction{
       Action.async { request =>
         User.findByEmail(email).map {
-            // match a list with a single user
           case user :: Nil =>
             Ok(Json.toJson(Map("emails" -> Email(email, "registered"))))
             // match no result or a list bigger than one.
