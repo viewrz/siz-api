@@ -78,7 +78,7 @@ object Story extends MongoModel("stories") {
       tags = newStory.tags,
       privacy = "Unlisted",
       loop = None)
-  
+
   def getBySlug(slug: String) = collection.find(Json.obj("slug" -> slug)).cursor[Story].collect[List]().map(_.headOption)
   def getById(id: String) = collection.find(Json.obj("_id" -> Json.obj("$oid" -> id))).cursor[Story].collect[List]().map(_.headOption)
 
