@@ -22,7 +22,7 @@ class StoriesSpec extends Specification {
         slug = "pepper-spray", source = Source("9dLmdVDjg1w","youtube",Some(1592000)), picture = Image("http://img.youtube.com/vi/9dLmdVDjg1w/0.jpg"), title = "Pepper Spray",
         tags = List("short-films"),
         privacy = "Unlisted")
-      Await.ready(Story.collection.insert(newStory), 1 seconds)
+      Await.result(Story.collection.insert(newStory), 1.0 seconds)
 
       val createdToken = contentAsJson(route(FakeRequest(POST, "/tokens").withJsonBody(JsObject(Seq()))).get)
 
