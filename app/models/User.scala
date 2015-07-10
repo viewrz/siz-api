@@ -16,7 +16,6 @@ case class User(email: Option[User.Email],
                 facebookToken: Option[String],
                 facebookUserId: Option[String],
                 creationDate: Date,
-                // public , private or unlisted. Specifies how the story can be retrieved
                 state: Option[String] = None)
 case class NewUser(email: Option[User.Email],
                    password: Option[User.Password],
