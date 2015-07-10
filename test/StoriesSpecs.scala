@@ -19,7 +19,7 @@ class StoriesSpec extends Specification {
       val storyId = "14339467864855da8fe28615"
       val privacy = "Unlisted"
       val newStory = Story(boxes = List(), creationDate = new Date(), id = storyId,
-        slug = "pepper-spray", source = Source("9dLmdVDjg1w","youtube",Some(1592000)), picture = Image("http://img.youtube.com/vi/9dLmdVDjg1w/0.jpg"), title = "Pepper Spray",
+        slug = "pepper-spray-stories", source = Source("9dLmdVDjg1w","youtube",Some(1592000)), picture = Image("http://img.youtube.com/vi/9dLmdVDjg1w/0.jpg"), title = "Pepper Spray",
         tags = List("short-films"),
         privacy = "Unlisted")
       Await.result(Story.collection.insert(newStory), 1.0 seconds)
