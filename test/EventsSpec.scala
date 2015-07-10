@@ -7,6 +7,10 @@ import play.api.test.{FakeRequest, WithApplication}
 import models._
 import java.util.Date
 
+import scala.concurrent.Await
+import scala.concurrent.duration._
+
+
 @RunWith(classOf[JUnitRunner])
 class EventsSpec extends Specification {
 
@@ -16,8 +20,8 @@ class EventsSpec extends Specification {
       val newStory = Story(boxes = List(), creationDate = new Date(), id = storyId,
         slug = "pepper-spray", source = Source("9dLmdVDjg1w","youtube",Some(1592000)), picture = Image("http://img.youtube.com/vi/9dLmdVDjg1w/0.jpg"), title = "Pepper Spray",
         tags = List("short-films"),
-        privacy = "unlisted")
-      Story.collection.insert(newStory)
+        privacy = "Unlisted")
+      Await.result(Story.collection.insert(newStory), 1.0 seconds)
 
       val jsonBody: JsValue = JsObject(
         Seq("events" ->
