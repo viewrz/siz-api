@@ -37,8 +37,8 @@ case class Story(boxes: List[Box],
                  picture: Image,
                  title: String,
                  tags: List[String],
-                 loop: Option[Loop] = None,
-                 privacy: String)
+                 privacy: String,
+                 loop: Option[Loop] = None)
 
 case class NewStory(boxes: List[NewBox],
                  source: Source,
