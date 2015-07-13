@@ -1,6 +1,6 @@
-FROM jdauphant/sbt
+FROM quay.io/sizio/sbt
 
-MAINTAINER Julien DAUPHANT
+MAINTAINER SIZ IO
 
 ENV PLAY_APP_NAME siz-api
 ENV PLAY_APP_DIR /var/www/$PLAY_APP_NAME

@@ -7,24 +7,34 @@ import utils.Hash
 import scala.concurrent.ExecutionContext.Implicits.global
 import java.util.Date
 
-case class User(email: Option[String],
-                passwordHash: Option[String],
+import scala.concurrent.Future
+
+case class User(email: Option[User.Email],
+                passwordHash: Option[User.BcryptPassword],
                 id: String,
-                username: Option[String],
+                username: Option[User.UserName],
                 facebookToken: Option[String],
                 facebookUserId: Option[String],
                 creationDate: Date,
                 state: Option[String] = None)
-case class NewUser(email: Option[String],
-                   password: Option[String],
-                   username: Option[String],
+case class NewUser(email: Option[User.Email],
+                   password: Option[User.Password],
+                   username: Option[User.UserName],
                    facebookToken: Option[String])
-case class LoginUser(email: Option[String],
-                     password: Option[String],
-                     username: Option[String],
+case class LoginUser(email: Option[User.Email],
+                     password: Option[User.Password],
+                     username: Option[User.UserName],
                      facebookToken: Option[String])
 
 object User extends MongoModel("users") {
+  type UserName = String
+  type Email = String
+  type Password = String
+  type BcryptPassword = String
+
+  def findByField(field: String, value: String) = collection.find(
+    Json.obj(field -> value)).cursor[User].collect[List]()
+
   def updateDB = {
     collection.indexesManager.ensure(Index(Seq("email" -> IndexType.Ascending), name = Some("emailUniqueIndex"), unique = true, sparse = true))
     collection.indexesManager.ensure(Index(Seq("username" -> IndexType.Ascending), name = Some("usernameUniqueIndex"), unique = true, sparse = true))
@@ -42,7 +52,7 @@ object User extends MongoModel("users") {
 
   def create(user: User) = collection.insert(user)
   def findById(id: String) = collection.find(Json.obj("_id" -> Json.obj("$oid" -> id))).cursor[User].collect[List]()
-  def findByEmail(email: String) = collection.find(Json.obj("email" -> email)).cursor[User].collect[List]()
-  def findByUsername(username: String) = collection.find(Json.obj("username" -> username)).cursor[User].collect[List]()
-  def findByFacebookUserId(facebookUserId: String) = collection.find(Json.obj("facebookUserId" -> facebookUserId)).cursor[User].collect[List]()
+  def findByEmail(email: Email) = findByField("email", email)
+  def findByUsername(username: UserName) = findByField("username", username)
+  def findByFacebookUserId(facebookUserId: String) = findByField("facebookUserId", facebookUserId)
 }
