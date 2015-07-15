@@ -39,10 +39,10 @@ trait APIJsonFormats extends CommonJsonFormats {
   val TagsRegex = "[0-9a-z-]{1,50}".r
 
   implicit val newUserRead: Reads[NewUser]  = (
-    (__ \ "email").readNullable[String](pattern(EmailRegex, "error.email")) and
-    (__ \ "password").readNullable[String](pattern(Sha256Regex, "error.sha256")) and
-    (__ \ "username").readNullable[String](pattern(UsernameRegex, "error.username")) and
-    (__ \ "facebookToken").readNullable[String](pattern(FacebookTokenRegex, "error.facebookToken"))
+    (JsPath \ "email").readNullable[String](pattern(EmailRegex, "error.email")) and
+    (JsPath \ "password").readNullable[String](pattern(Sha256Regex, "error.sha256")) and
+    (JsPath \ "username").readNullable[String](pattern(UsernameRegex, "error.username")) and
+    (JsPath \ "facebookToken").readNullable[String](pattern(FacebookTokenRegex, "error.facebookToken"))
     )(NewUser.apply _)
 
   val likeNopeValidate = Reads.StringReads.filter(ValidationError("error.event.type")){
@@ -52,25 +52,30 @@ trait APIJsonFormats extends CommonJsonFormats {
   def isValidTagList(tags: List[String]) = tags.forall(TagsRegex.pattern.matcher(_).matches())
 
   implicit val eventRead: Reads[NewEvent]  = (
-      (__ \ "storyId").read[String](pattern(StoryIdRegex, "error.story.id")) and
-      (__ \ "type").read[String](likeNopeValidate) and
-      (__ \ "date").readNullable[Date].map(_.getOrElse(new Date()))
+      (JsPath \ "storyId").read[String](pattern(StoryIdRegex, "error.story.id")) and
+      (JsPath \ "type").read[String](likeNopeValidate) and
+      (JsPath \ "date").readNullable[Date].map(_.getOrElse(new Date()))
     )(NewEvent.apply _)
 
   implicit val loginUserRead: Reads[LoginUser]  = (
-    (__ \ "email").readNullable[String](pattern(EmailRegex, "error.email")) and
-    (__ \ "password").readNullable[String](pattern(Sha256Regex, "error.sha256")) and
-    (__ \ "username").readNullable[String](pattern(UsernameRegex, "error.username")) and
-    (__ \ "facebookToken").readNullable[String](pattern(FacebookTokenRegex, "error.facebookToken"))
+    (JsPath \ "email").readNullable[String](pattern(EmailRegex, "error.email")) and
+    (JsPath \ "password").readNullable[String](pattern(Sha256Regex, "error.sha256")) and
+    (JsPath \ "username").readNullable[String](pattern(UsernameRegex, "error.username")) and
+    (JsPath \ "facebookToken").readNullable[String](pattern(FacebookTokenRegex, "error.facebookToken"))
   )(LoginUser.apply _)
 
-
+  implicit val newBoxRead = Json.reads[NewBox]
   implicit val sourceRead = typeReads[Source](Json.reads[Source])
 
+  implicit val newStoryRead: Reads[NewStory]  = (
+    (JsPath \ "boxes").read[List[NewBox]] and
+      (JsPath \ "source").read[Source] and
+      (JsPath \ "title").read[String](maxLength[String](100)) and
+      (JsPath \ "tags").read[List[String]]
+    )(NewStory.apply _)
+
+
   implicit val imageRead = Json.reads[Image]
-  implicit val newBoxRead = Json.reads[NewBox]
-  implicit val newStoryRead = Json.reads[NewStory]
-  
   implicit val eventWrite = typeWrites(Json.writes[Event])
   implicit val errorWrite = Json.writes[Error]
   implicit val emailWrite = addHref("emails",Json.writes[Email])
