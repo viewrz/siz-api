@@ -18,7 +18,7 @@ case class Event(storyId: String, _type: String, tags: List[String], viewerProfi
 
 object Event extends MongoModel("events")
 {
-  def ensureIndexes = {
+  def updateDB = {
      collection.indexesManager.ensure(Index(Seq("storyId" -> IndexType.Ascending,"viewerProfileId" -> IndexType.Ascending), name = Some("storyIdViewerProfileIdUniqueIndex"), unique = true, sparse = true))
   }
 

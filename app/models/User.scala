@@ -35,7 +35,7 @@ object User extends MongoModel("users") {
   def findByField(field: String, value: String) = collection.find(
     Json.obj(field -> value)).cursor[User].collect[List]()
 
-  def ensureIndexes = {
+  def updateDB = {
     collection.indexesManager.ensure(Index(Seq("email" -> IndexType.Ascending), name = Some("emailUniqueIndex"), unique = true, sparse = true))
     collection.indexesManager.ensure(Index(Seq("username" -> IndexType.Ascending), name = Some("usernameUniqueIndex"), unique = true, sparse = true))
     collection.indexesManager.ensure(Index(Seq("facebookUserId" -> IndexType.Ascending), name = Some("facebookUserIdUniqueIndex"), unique = true, sparse = true))
