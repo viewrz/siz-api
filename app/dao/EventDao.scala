@@ -18,6 +18,9 @@ class EventDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Reactiv
 
   def collection: JSONCollection = db.collection[JSONCollection]("events")
 
+  // migrate data before app startup and after injection
+  updateDB
+
   def updateDB = {
     collection.indexesManager.ensure(Index(Seq("storyId" -> IndexType.Ascending, "viewerProfileId" -> IndexType.Ascending), name = Some("storyIdViewerProfileIdUniqueIndex"), unique = true, sparse = true))
   }

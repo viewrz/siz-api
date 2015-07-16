@@ -26,6 +26,9 @@ class StoryDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Reactiv
 
   def collection: JSONCollection = db.collection[JSONCollection]("stories")
 
+  // migrate data before app startup and after injection
+  updateDB
+
   def updateDB = {
     collection.indexesManager.ensure(Index(Seq("slug" -> IndexType.Ascending, "slug" -> IndexType.Ascending), name = Some("slugUniqueIndex"), unique = true))
     collection.update(Json.obj("privacy" -> Json.obj("$exists" -> false)), Json.obj("$set" -> Json.obj("Privacy" -> "Public")), multi = true)

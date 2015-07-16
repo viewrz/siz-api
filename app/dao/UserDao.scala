@@ -27,6 +27,9 @@ class UserDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Reactive
 
   def collection: JSONCollection = db.collection[JSONCollection]("users")
 
+  // migrate data before app startup and after injection
+  updateDB
+
   def findByField(field: String, value: String) = collection.find(
     Json.obj(field -> value)).cursor[User]().collect[List]()
 
