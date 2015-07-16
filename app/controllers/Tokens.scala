@@ -1,6 +1,9 @@
 package controllers
 
+import javax.inject.Inject
+
 import actions.{TokenCheckAction, LoggingAction}
+import dao.{TokenDao, UserDao}
 
 import formats.APIJsonFormats
 import models._
@@ -10,7 +13,7 @@ import play.api.mvc.{BodyParsers, Action, Controller}
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-object Tokens extends Controller with APIJsonFormats {
+class Tokens @Inject()(userDao: UserDao, tokenDao: TokenDao) extends Controller with APIJsonFormats {
 
   // V1.0 compatibility
   def createDispatcher = LoggingAction {
@@ -19,7 +22,7 @@ object Tokens extends Controller with APIJsonFormats {
         case None =>
           createToken
         case Some(obj: JsObject) =>
-          Token.newToken.flatMap {
+          tokenDao.newToken.flatMap {
             token =>
               update(token, obj)
           }
@@ -47,7 +50,7 @@ object Tokens extends Controller with APIJsonFormats {
       (request.token.userId, (request.body \ "users").toOption) match {
         case (Some(_), _) =>
           Future.successful(BadRequest(Error.toTopLevelJson("An user is already logged on this token, discard this token and create a new one.")))
-        case (None, Some(obj : JsObject)) =>
+        case (None, Some(obj: JsObject)) =>
           update(request.token, obj)
       }
     }
