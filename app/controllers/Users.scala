@@ -1,29 +1,26 @@
 package controllers
 
 import actions.{LoggingAction, TokenCheckAction}
-
 import akka.io.IO
-import akka.util.Timeout
 import akka.pattern.ask
-import models.User.UserName
-import play.api.libs.concurrent.Akka
-import spray.can.Http
-import spracebook.SprayClientFacebookGraphApi
-import spracebook.Exceptions._
-
+import akka.util.Timeout
 import formats.APIJsonFormats
+import models.User.UserName
 import models._
-import play.api._
-import play.api.libs.json.{JsValue, JsError, Json}
-import play.api.mvc._
 import play.api.Play.current
-
+import play.api._
+import play.api.libs.concurrent.Akka
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import play.api.libs.json.{JsObject, JsValue, Json}
+import play.api.mvc._
 import reactivemongo.core.errors.DatabaseException
+import spracebook.Exceptions._
+import spracebook.SprayClientFacebookGraphApi
+import spray.can.Http
 import utils.Hash
 
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import scala.concurrent.duration._
 import scala.concurrent.Future
+import scala.concurrent.duration._
 import scala.language.postfixOps
 
 object Users extends Controller with APIJsonFormats {
@@ -48,13 +45,13 @@ object Users extends Controller with APIJsonFormats {
     }
   }
 
-  def create = LoggingAction{
+  def create = LoggingAction {
     TokenCheckAction.async(BodyParsers.parse.tolerantJson) { request =>
-      request.token.userId match {
-        case Some(_) =>
+      (request.token.userId, (request.body \ "users").toOption) match {
+        case (Some(_), _) =>
           Future.successful(BadRequest(Error.toTopLevelJson("An user is already logged on this token, discard this token and create a new one.")))
-        case None =>
-          createUser(request.token, (request.body \ "users"))
+        case (None, Some(obj : JsObject)) =>
+          createUser(request.token, obj)
       }
     }
   }
