@@ -8,11 +8,15 @@ import models.{NewUser, User}
 import models.User._
 import play.api.libs.json.Json
 import play.modules.reactivemongo.{ReactiveMongoComponents, ReactiveMongoApi}
-import play.modules.reactivemongo.json.collection.JSONCollection
+
+import play.modules.reactivemongo.json._
+import play.modules.reactivemongo.json.collection._
+
 import reactivemongo.api.indexes.{IndexType, Index}
 import reactivemongo.bson.BSONObjectID
 import utils.Hash
 
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 /**
  * Created by fred on 16/07/15.
@@ -20,10 +24,11 @@ import utils.Hash
 @Singleton
 class UserDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends ReactiveMongoComponents {
   lazy val db = reactiveMongoApi.db
+
   def collection: JSONCollection = db.collection[JSONCollection]("users")
 
   def findByField(field: String, value: String) = collection.find(
-    Json.obj(field -> value)).cursor[User].collect[List]()
+    Json.obj(field -> value)).cursor[User]().collect[List]()
 
   def updateDB = {
     collection.indexesManager.ensure(Index(Seq("email" -> IndexType.Ascending), name = Some("emailUniqueIndex"), unique = true, sparse = true))
@@ -42,7 +47,7 @@ class UserDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Reactive
 
   def create(user: User) = collection.insert(user)
 
-  def findById(id: String) = collection.find(Json.obj("_id" -> Json.obj("$oid" -> id))).cursor[User].collect[List]()
+  def findById(id: String) = collection.find(Json.obj("_id" -> Json.obj("$oid" -> id))).cursor[User]().collect[List]()
 
   def findByEmail(email: Email) = findByField("email", email)
 
