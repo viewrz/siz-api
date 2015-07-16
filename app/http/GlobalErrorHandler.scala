@@ -5,10 +5,8 @@ import play.api.http.HttpErrorHandler
 import play.api.mvc.Results._
 import play.api.mvc.{Result, RequestHeader}
 
-import scala.Error
 import scala.concurrent.Future
-import play.api.http._
-import play.api.http.Status._
+import play.mvc.Http.Status._
 
 /**
  * Created by fred on 16/07/15.
@@ -18,7 +16,7 @@ class GlobalErrorHandler extends HttpErrorHandler {
                              statusCode: Int,
                              message: String):
   Future[Result] = {
-    Status match {
+    statusCode match {
       case BAD_REQUEST =>
         Future.successful(BadRequest(Error.toTopLevelJson(Error(message))))
       case NOT_FOUND =>

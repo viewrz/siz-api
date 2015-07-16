@@ -1,12 +1,12 @@
 package controllers
 
-import javax.inject.Inject
+import javax.inject.{Singleton, Inject}
 
 import actions.{LoggingAction, TokenCheckAction}
 import akka.io.IO
 import akka.pattern.ask
 import akka.util.Timeout
-import dao.UserDao
+import dao.{TokenDao, UserDao}
 import formats.APIJsonFormats
 import models.User.UserName
 import models._
@@ -26,19 +26,20 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-class Users @Inject()(userDao: UserDao) extends Controller with APIJsonFormats {
+@Singleton
+class Users @Inject()(userDao: UserDao, tokenDao: TokenDao, tokenCheckAction: TokenCheckAction) extends Controller with APIJsonFormats {
 
   // V1.0 compatibility
   def createDispatcher = LoggingAction {
     Action.async(BodyParsers.parse.tolerantJson) { request =>
       request.headers.get(access_token_header) match {
         case None =>
-          Token.newToken.flatMap {
+          tokenDao.newToken.flatMap {
             token =>
               createUser(token, request.body)
           }
         case Some(access_token) =>
-          Token.findById(access_token).flatMap {
+          tokenDao.findById(access_token).flatMap {
             case token :: Nil if token.id == access_token =>
               createUser(token, request.body)
             case _ =>
@@ -49,7 +50,7 @@ class Users @Inject()(userDao: UserDao) extends Controller with APIJsonFormats {
   }
 
   def create = LoggingAction {
-    TokenCheckAction.async(BodyParsers.parse.tolerantJson) { request =>
+    tokenCheckAction.async(BodyParsers.parse.tolerantJson) { request =>
       (request.token.userId, (request.body \ "users").toOption) match {
         case (Some(_), _) =>
           Future.successful(BadRequest(Error.toTopLevelJson("An user is already logged on this token, discard this token and create a new one.")))
@@ -105,7 +106,7 @@ class Users @Inject()(userDao: UserDao) extends Controller with APIJsonFormats {
   def createUser(user: User)(token: Token): Future[Result] = {
     userDao.create(user).flatMap { lastError =>
       Logger.debug(s"Successfully inserted with LastError: $lastError")
-      Token.updateToken(token, user.id).map(
+      tokenDao.updateToken(token, user.id).map(
         token =>
           Created(Json.toJson(TopLevel(users = Some(user), tokens = Some(token))))
       )
@@ -168,7 +169,7 @@ class Users @Inject()(userDao: UserDao) extends Controller with APIJsonFormats {
   def loginByEmail(email: String, loginPasswordHash: String)(token: Token): Future[Result] = userDao.findByEmail(email).flatMap {
     users => users match {
       case User(Some(`email`), Some(passwordHash), id, _, _, _, _, _) :: Nil if Hash.bcrypt_compare(loginPasswordHash, passwordHash) =>
-        Token.updateToken(token, id).map(
+        tokenDao.updateToken(token, id).map(
           token =>
             Ok(Json.toJson(TopLevel(users = Some(users.head), tokens = Some(token))))
         )
@@ -184,7 +185,7 @@ class Users @Inject()(userDao: UserDao) extends Controller with APIJsonFormats {
   def loginByUsername(username: String, loginPasswordHash: String)(token: Token): Future[Result] = userDao.findByUsername(username).flatMap {
     users => users match {
       case User(_, Some(passwordHash), id, Some(`username`), _, _, _, _) :: Nil if Hash.bcrypt_compare(loginPasswordHash, passwordHash) =>
-        Token.updateToken(token, id).map(
+        tokenDao.updateToken(token, id).map(
           token =>
             Ok(Json.toJson(TopLevel(users = Some(users.head), tokens = Some(token))))
         )
@@ -199,12 +200,12 @@ class Users @Inject()(userDao: UserDao) extends Controller with APIJsonFormats {
 
 
   def loginByFacebook(facebookToken: String)(token: Token): Future[Result] = {
-    retrieveFacebookUserId(facebookToken).flatMap{
+    retrieveFacebookUserId(facebookToken).flatMap {
       facebookUserId =>
         userDao.findByFacebookUserId(facebookUserId).flatMap {
           users => users match {
             case User(_, _, id, _, _, Some(`facebookUserId`), _, _) :: Nil =>
-              Token.updateToken(token, id).map(
+              tokenDao.updateToken(token, id).map(
                 token =>
                   Ok(Json.toJson(TopLevel(users = Some(users.head), tokens = Some(token))))
               )
@@ -225,7 +226,7 @@ class Users @Inject()(userDao: UserDao) extends Controller with APIJsonFormats {
   val access_token_header = Play.configuration.getString("api.accesstokenheader").get
 
   def get(id: String) = LoggingAction {
-    TokenCheckAction.async { request =>
+    tokenCheckAction.async { request =>
       userDao.findById(id).map {
         case user :: Nil =>
           Ok(Json.toJson(TopLevel(users = Some(user))))

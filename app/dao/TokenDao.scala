@@ -14,8 +14,9 @@ import scala.concurrent.Future
 import scala.util.Random
 
 import play.modules.reactivemongo.json._
-
+import play.modules.reactivemongo.json.collection._
 import formats.MongoJsonFormats._
+
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 /**

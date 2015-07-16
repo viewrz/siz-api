@@ -13,6 +13,13 @@ import reactivemongo.api.QueryOpts
 import reactivemongo.api.indexes.{IndexType, Index}
 import reactivemongo.bson.BSONObjectID
 import utils.{Queue, Slug}
+
+import play.modules.reactivemongo.json._
+import play.modules.reactivemongo.json.collection._
+import formats.MongoJsonFormats._
+
+import play.api.Play.current
+
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import scala.concurrent.Future

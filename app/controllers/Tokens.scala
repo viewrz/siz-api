@@ -13,7 +13,7 @@ import play.api.mvc.{BodyParsers, Action, Controller}
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-class Tokens @Inject()(userDao: UserDao, tokenDao: TokenDao) extends Controller with APIJsonFormats {
+class Tokens @Inject()(userDao: UserDao, tokenDao: TokenDao, tokenCheckAction: TokenCheckAction, userController: Users) extends Controller with APIJsonFormats {
 
   // V1.0 compatibility
   def createDispatcher = LoggingAction {
@@ -39,14 +39,14 @@ class Tokens @Inject()(userDao: UserDao, tokenDao: TokenDao) extends Controller 
     }
   }*/
 
-  def createToken = Token.newToken.map {
+  def createToken = tokenDao.newToken.map {
     token =>
       Created(Json.toJson(TopLevel(tokens = Some(token))))
   }
 
   // V1.0 and V1.1
   def updateDispatcher(tokenId: String) = LoggingAction {
-    TokenCheckAction.async(BodyParsers.parse.tolerantJson) { request =>
+    tokenCheckAction.async(BodyParsers.parse.tolerantJson) { request =>
       (request.token.userId, (request.body \ "users").toOption) match {
         case (Some(_), _) =>
           Future.successful(BadRequest(Error.toTopLevelJson("An user is already logged on this token, discard this token and create a new one.")))
@@ -64,11 +64,11 @@ class Tokens @Inject()(userDao: UserDao, tokenDao: TokenDao) extends Controller 
       },
       loginUser => loginUser match {
         case LoginUser(Some(email), Some(passwordHash), None, None) =>
-          Users.loginByEmail(email, passwordHash)(token)
+          userController.loginByEmail(email, passwordHash)(token)
         case LoginUser(None, Some(passwordHash), Some(username), None) =>
-          Users.loginByUsername(username, passwordHash)(token)
+          userController.loginByUsername(username, passwordHash)(token)
         case LoginUser(None, None, None, Some(facebookToken)) =>
-          Users.loginByFacebook(facebookToken)(token)
+          userController.loginByFacebook(facebookToken)(token)
         case _ =>
           Future.successful(BadRequest(Error.toTopLevelJson(s"Missing fields to login")))
       }

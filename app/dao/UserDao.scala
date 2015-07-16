@@ -2,19 +2,22 @@ package dao
 
 
 import java.util.Date
-import javax.inject.Inject
+import javax.inject.{Singleton, Inject}
 
 import models.{NewUser, User}
 import models.User._
 import play.api.libs.json.Json
 import play.modules.reactivemongo.{ReactiveMongoComponents, ReactiveMongoApi}
 
-import play.modules.reactivemongo.json._
-import play.modules.reactivemongo.json.collection._
 
 import reactivemongo.api.indexes.{IndexType, Index}
 import reactivemongo.bson.BSONObjectID
 import utils.Hash
+import play.modules.reactivemongo.json._
+import play.modules.reactivemongo.json.collection._
+import formats.MongoJsonFormats._
+
+
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 

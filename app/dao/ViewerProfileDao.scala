@@ -4,18 +4,22 @@ import javax.inject.{Inject, Singleton}
 
 import models.{Event, ViewerProfile}
 import play.api.libs.json.{JsNumber, JsObject, Json}
-import play.modules.reactivemongo.json.collection.JSONCollection
 import play.modules.reactivemongo.{ReactiveMongoComponents, ReactiveMongoApi}
-import play.modules.reactivemongo.json.collection
+
+import play.modules.reactivemongo.json._
+import play.modules.reactivemongo.json.collection._
+import formats.MongoJsonFormats._
 
 import scala.concurrent.Future
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+
 /**
  * Created by fred on 16/07/15.
  */
 @Singleton
 class ViewerProfileDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends ReactiveMongoComponents {
+  def insert (plop : ViewerProfile) = collection.insert(plop)
   lazy val db = reactiveMongoApi.db
 
   def collection: JSONCollection = db.collection[JSONCollection]("viewerprofiles")
