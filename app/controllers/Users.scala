@@ -1,9 +1,12 @@
 package controllers
 
+import javax.inject.Inject
+
 import actions.{LoggingAction, TokenCheckAction}
 import akka.io.IO
 import akka.pattern.ask
 import akka.util.Timeout
+import dao.UserDao
 import formats.APIJsonFormats
 import models.User.UserName
 import models._
@@ -23,7 +26,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-object Users extends Controller with APIJsonFormats {
+class Users @Inject()(userDao: UserDao) extends Controller with APIJsonFormats {
 
   // V1.0 compatibility
   def createDispatcher = LoggingAction {
@@ -50,7 +53,7 @@ object Users extends Controller with APIJsonFormats {
       (request.token.userId, (request.body \ "users").toOption) match {
         case (Some(_), _) =>
           Future.successful(BadRequest(Error.toTopLevelJson("An user is already logged on this token, discard this token and create a new one.")))
-        case (None, Some(obj : JsObject)) =>
+        case (None, Some(obj: JsObject)) =>
           createUser(request.token, obj)
       }
     }
@@ -80,60 +83,60 @@ object Users extends Controller with APIJsonFormats {
   }
 
   def createUserByEmail(user: NewUser)(token: Token): Future[Result] = {
-    val newUser = User.fromNewUser(user, userId = Some(token.viewerProfileId))
+    val newUser = userDao.fromNewUser(user, userId = Some(token.viewerProfileId))
     createUser(newUser)(token)
   }
 
   def createUserByFacebook(user: NewUser, facebookToken: String)(token: Token): Future[Result] = {
-    retrieveFacebookUserId(facebookToken).flatMap{
+    retrieveFacebookUserId(facebookToken).flatMap {
       facebookUserId =>
-        val newUser = User.fromNewUser(user, Some(facebookUserId), Some(token.viewerProfileId))
+        val newUser = userDao.fromNewUser(user, Some(facebookUserId), Some(token.viewerProfileId))
         createUser(newUser)(token)
     }.recover {
       case exception: FacebookException if exception.exceptionType == "OAuthException" =>
         Unauthorized(Error.toTopLevelJson(Error("Invalid facebook access token")))
-      case InvalidAccessTokenException(_,_,_,_) =>
+      case InvalidAccessTokenException(_, _, _, _) =>
         Unauthorized(Error.toTopLevelJson(Error("Invalid facebook access token")))
-      case AccessTokenExpiredException(_,_,_,_) =>
+      case AccessTokenExpiredException(_, _, _, _) =>
         Unauthorized(Error.toTopLevelJson(Error("Expired facebook access token")))
     }
   }
 
   def createUser(user: User)(token: Token): Future[Result] = {
-    User.create(user).flatMap{ lastError =>
+    userDao.create(user).flatMap { lastError =>
       Logger.debug(s"Successfully inserted with LastError: $lastError")
-      Token.updateToken(token,user.id).map(
+      Token.updateToken(token, user.id).map(
         token =>
-          Created(Json.toJson(TopLevel(users = Some(user), tokens=Some(token))))
+          Created(Json.toJson(TopLevel(users = Some(user), tokens = Some(token))))
       )
     }.recover {
-      case exception: DatabaseException if exception.code.contains(11000) && exception.getMessage().contains("emailUniqueIndex")=>
-        Logger.debug("email already exist with database: "+exception.getMessage())
+      case exception: DatabaseException if exception.code.contains(11000) && exception.getMessage().contains("emailUniqueIndex") =>
+        Logger.debug("email already exist with database: " + exception.getMessage())
         Conflict(Error.toTopLevelJson(s"An user with email ${user.email} already exists"))
-      case exception: DatabaseException if exception.code.contains(11000) && exception.getMessage().contains("usernameUniqueIndex")=>
-        Logger.debug("username already exist with database: "+exception.getMessage())
+      case exception: DatabaseException if exception.code.contains(11000) && exception.getMessage().contains("usernameUniqueIndex") =>
+        Logger.debug("username already exist with database: " + exception.getMessage())
         Conflict(Error.toTopLevelJson(s"An user with username ${user.username} already exists"))
-      case exception: DatabaseException if exception.code.contains(11000) && exception.getMessage().contains("facebookUserIdUniqueIndex")=>
-        Logger.debug("username already exist with database: "+exception.getMessage())
+      case exception: DatabaseException if exception.code.contains(11000) && exception.getMessage().contains("facebookUserIdUniqueIndex") =>
+        Logger.debug("username already exist with database: " + exception.getMessage())
         Conflict(Error.toTopLevelJson(s"An user with facebookUserId ${user.facebookUserId.get} already exists"))
     }
   }
 
-  def checkEmail(email: User.Email) = LoggingAction{
-      Action.async { request =>
-        User.findByEmail(email).map {
-          case user :: Nil =>
-            Ok(Json.toJson(Map("emails" -> Email(email, "registered"))))
-            // match no result or a list bigger than one.
-          case _ =>
-            NotFound(Error.toTopLevelJson(Error("Email not found")))
-        }
+  def checkEmail(email: User.Email) = LoggingAction {
+    Action.async { request =>
+      userDao.findByEmail(email).map {
+        case user :: Nil =>
+          Ok(Json.toJson(Map("emails" -> Email(email, "registered"))))
+        // match no result or a list bigger than one.
+        case _ =>
+          NotFound(Error.toTopLevelJson(Error("Email not found")))
       }
+    }
   }
 
-  def checkUsername(username: UserName) = LoggingAction{
+  def checkUsername(username: UserName) = LoggingAction {
     Action.async { request =>
-      User.findByUsername(username).map {
+      userDao.findByUsername(username).map {
         case user :: Nil =>
           Ok(Json.toJson(Map("usernames" -> Username(username, "registered"))))
         case Nil =>
@@ -151,8 +154,8 @@ object Users extends Controller with APIJsonFormats {
     val facebook: Future[SprayClientFacebookGraphApi] = for {
       Http.HostConnectorInfo(connector, _) <- IO(Http) ? Http.HostConnectorSetup("graph.facebook.com", 443, true)
     } yield {
-      new SprayClientFacebookGraphApi(connector)
-    }
+        new SprayClientFacebookGraphApi(connector)
+      }
 
     facebook.flatMap(_.getUser(facebookToken)).map {
       user =>
@@ -162,12 +165,12 @@ object Users extends Controller with APIJsonFormats {
   }
 
 
-  def loginByEmail(email: String, loginPasswordHash: String)(token: Token): Future[Result] = User.findByEmail(email).flatMap {
+  def loginByEmail(email: String, loginPasswordHash: String)(token: Token): Future[Result] = userDao.findByEmail(email).flatMap {
     users => users match {
-      case User(Some(`email`), Some(passwordHash), id, _, _,_, _, _) :: Nil if Hash.bcrypt_compare(loginPasswordHash,passwordHash) =>
-        Token.updateToken(token,id).map(
+      case User(Some(`email`), Some(passwordHash), id, _, _, _, _, _) :: Nil if Hash.bcrypt_compare(loginPasswordHash, passwordHash) =>
+        Token.updateToken(token, id).map(
           token =>
-            Ok(Json.toJson(TopLevel(users = Some(users.head), tokens= Some(token))))
+            Ok(Json.toJson(TopLevel(users = Some(users.head), tokens = Some(token))))
         )
       case User(Some(`email`), None, _, _, Some(_), Some(_), _, _) :: Nil =>
         Future.successful(BadRequest(Error.toTopLevelJson(Error("User don't have password"))))
@@ -178,12 +181,12 @@ object Users extends Controller with APIJsonFormats {
     }
   }
 
-  def loginByUsername(username: String, loginPasswordHash: String)(token: Token): Future[Result] = User.findByUsername(username).flatMap {
+  def loginByUsername(username: String, loginPasswordHash: String)(token: Token): Future[Result] = userDao.findByUsername(username).flatMap {
     users => users match {
-      case User(_, Some(passwordHash), id, Some(`username`), _, _, _, _) :: Nil if Hash.bcrypt_compare(loginPasswordHash,passwordHash) =>
-        Token.updateToken(token,id).map(
+      case User(_, Some(passwordHash), id, Some(`username`), _, _, _, _) :: Nil if Hash.bcrypt_compare(loginPasswordHash, passwordHash) =>
+        Token.updateToken(token, id).map(
           token =>
-            Ok(Json.toJson(TopLevel(users = Some(users.head), tokens= Some(token))))
+            Ok(Json.toJson(TopLevel(users = Some(users.head), tokens = Some(token))))
         )
       case User(_, None, _, Some(`username`), Some(_), Some(_), _, _) :: Nil =>
         Future.successful(BadRequest(Error.toTopLevelJson(Error("User don't have password"))))
@@ -196,14 +199,14 @@ object Users extends Controller with APIJsonFormats {
 
 
   def loginByFacebook(facebookToken: String)(token: Token): Future[Result] = {
-    Users.retrieveFacebookUserId(facebookToken).flatMap{
+    retrieveFacebookUserId(facebookToken).flatMap{
       facebookUserId =>
-        User.findByFacebookUserId(facebookUserId).flatMap {
+        userDao.findByFacebookUserId(facebookUserId).flatMap {
           users => users match {
             case User(_, _, id, _, _, Some(`facebookUserId`), _, _) :: Nil =>
-              Token.updateToken(token,id).map(
+              Token.updateToken(token, id).map(
                 token =>
-                  Ok(Json.toJson(TopLevel(users = Some(users.head), tokens= Some(token))))
+                  Ok(Json.toJson(TopLevel(users = Some(users.head), tokens = Some(token))))
               )
             case _ =>
               Future.successful(NotFound(Error.toTopLevelJson(Error("No user account for the facebookUserId associated to this facebookToken"))))
@@ -212,9 +215,9 @@ object Users extends Controller with APIJsonFormats {
     }.recover {
       case exception: FacebookException if exception.exceptionType == "OAuthException" =>
         NotFound(Error.toTopLevelJson(Error("Invalid facebook access token")))
-      case InvalidAccessTokenException(_,_,_,_) =>
+      case InvalidAccessTokenException(_, _, _, _) =>
         NotFound(Error.toTopLevelJson(Error("Invalid facebook access token")))
-      case AccessTokenExpiredException(_,_,_,_) =>
+      case AccessTokenExpiredException(_, _, _, _) =>
         NotFound(Error.toTopLevelJson(Error("Expired facebook access token")))
     }
   }
@@ -222,13 +225,13 @@ object Users extends Controller with APIJsonFormats {
   val access_token_header = Play.configuration.getString("api.accesstokenheader").get
 
   def get(id: String) = LoggingAction {
-      TokenCheckAction.async { request =>
-        User.findById(id).map {
-          case user :: Nil =>
-            Ok(Json.toJson(TopLevel(users = Some(user))))
-          case _ =>
-            NotFound(Error.toTopLevelJson(Error(s"User $id not found")))
-        }
+    TokenCheckAction.async { request =>
+      userDao.findById(id).map {
+        case user :: Nil =>
+          Ok(Json.toJson(TopLevel(users = Some(user))))
+        case _ =>
+          NotFound(Error.toTopLevelJson(Error(s"User $id not found")))
       }
+    }
   }
 }
