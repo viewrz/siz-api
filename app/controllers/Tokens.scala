@@ -15,10 +15,10 @@ object Tokens extends Controller with APIJsonFormats {
   // V1.0 compatibility
   def createDispatcher = LoggingAction {
     Action.async(BodyParsers.parse.tolerantJson) { request =>
-      (request.body \ "users") match {
-        case _: JsUndefined =>
+      (request.body \ "users").toOption match {
+        case None =>
           createToken
-        case obj: JsObject =>
+        case Some(obj: JsObject) =>
           Token.newToken.flatMap {
             token =>
               update(token, obj)
@@ -44,16 +44,16 @@ object Tokens extends Controller with APIJsonFormats {
   // V1.0 and V1.1
   def updateDispatcher(tokenId: String) = LoggingAction {
     TokenCheckAction.async(BodyParsers.parse.tolerantJson) { request =>
-      request.token.userId match {
-        case Some(_) =>
+      (request.token.userId, (request.body \ "users").toOption) match {
+        case (Some(_), _) =>
           Future.successful(BadRequest(Error.toTopLevelJson("An user is already logged on this token, discard this token and create a new one.")))
-        case None =>
-          update(request.token, (request.body \ "users"))
+        case (None, Some(obj : JsObject)) =>
+          update(request.token, obj)
       }
     }
   }
 
-  def update(token: Token, obj: JsValue) = {
+  def update(token: Token, obj: JsObject) = {
     val userResult = obj.validate[LoginUser]
     userResult.fold(
       validationErrors => {

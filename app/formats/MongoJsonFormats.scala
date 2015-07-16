@@ -1,31 +1,33 @@
 package formats
 
+import play.modules.reactivemongo.json._
+import play.modules.reactivemongo.json.collection._
+
 import models._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
-import play.modules.reactivemongo.json.BSONFormats
 
 trait MongoJsonFormats extends CommonJsonFormats {
   import BSONFormats.BSONObjectIDFormat
 
   def mongoReadsObjectId[T](r: Reads[T]): Reads[T] = {
-    __.json.update((__ \ 'id).json.copyFrom((__ \ '_id \ '$oid).json.pick[JsString] )) andThen r
+    JsPath.json.update((JsPath \ 'id).json.copyFrom((JsPath \ '_id \ '$oid).json.pick[JsString] )) andThen r
   }
 
   def mongoWritesObjectId[T](w : Writes[T]): Writes[T] = {
-    w.transform( js => js.as[JsObject] - "id"  ++ Json.obj("_id" -> Json.obj("$oid" -> js \ "id")) )
+    w.transform( js => js.as[JsObject] - "id"  ++ Json.obj("_id" -> Json.obj("$oid" -> (js \ "id").get)) )
   }
 
   def mongoReadsStringId[T](r: Reads[T]): Reads[T] = {
-    __.json.update((__ \ 'id).json.copyFrom((__ \ '_id).json.pick[JsString] )) andThen r
+    JsPath.json.update((JsPath \ 'id).json.copyFrom((JsPath \ '_id).json.pick[JsString] )) andThen r
   }
 
   def mongoWritesStringId[T](w : Writes[T]): Writes[T] = {
-    w.transform( js => js.as[JsObject] - "id"  ++ Json.obj("_id" -> js \ "id"))
+    w.transform( js => js.as[JsObject] - "id"  ++ Json.obj("_id" -> (js \ "id").get))
   }
   def withDefault[A](key:String, default: List[String])(r:Reads[A]) = {
-    __.json.update((__ \ key).json.copyFrom((__ \ key).json.pick orElse Reads.pure(Json.toJson(default)))) andThen r
+    JsPath.json.update((JsPath \ key).json.copyFrom((JsPath \ key).json.pick orElse Reads.pure(Json.toJson(default)))) andThen r
   }
 
   implicit val tokenRead = mongoReadsStringId[Token](Json.reads[Token])

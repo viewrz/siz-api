@@ -13,6 +13,8 @@ import utils.{Queue, Slug}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
+import play.modules.reactivemongo.json._
+
 
 case class VideoFormat(href: String, _type: String)
 case class Box(height: Option[Int],
