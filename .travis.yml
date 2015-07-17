@@ -9,7 +9,7 @@ cache:
   - '$HOME/.m2/repository'
   - '$HOME/.ivy2/cache'
 before_script:
-- sbt dependencies
+- sbt allDependencies
 services:
 - mongodb
 env:
