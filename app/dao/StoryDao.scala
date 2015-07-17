@@ -22,7 +22,7 @@ import play.api.Play.current
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-import scala.concurrent.Future
+import scala.concurrent.{Awaitable, Future}
 
 /**
  * Created by fred on 16/07/15.
@@ -33,9 +33,9 @@ class StoryDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Reactiv
 
   def collection: JSONCollection = db.collection[JSONCollection]("stories")
 
+
   // migrate data before app startup and after injection
   updateDB
-
   def updateDB = {
     collection.indexesManager.ensure(Index(Seq("slug" -> IndexType.Ascending, "slug" -> IndexType.Ascending), name = Some("slugUniqueIndex"), unique = true))
     collection.update(Json.obj("privacy" -> Json.obj("$exists" -> false)), Json.obj("$set" -> Json.obj("Privacy" -> "Public")), multi = true)
@@ -49,6 +49,8 @@ class StoryDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Reactiv
 
   def getByIds(ids: List[String]) =
     collection.find(Json.obj("_id" -> Json.obj("$in" -> ids.map(id => Json.obj("$oid" -> id))))).cursor[Story].collect[List]()
+
+  def insert(story: Story) = collection.insert(story)
 
   private def newBoxToBox(newBox: NewBox) =
     Box(height = None,

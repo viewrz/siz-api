@@ -1,3 +1,6 @@
+import javax.inject.Inject
+
+import dao.StoryDao
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
@@ -10,9 +13,8 @@ import java.util.Date
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-
 @RunWith(classOf[JUnitRunner])
-class EventsSpec extends Specification {
+class EventsSpec @Inject() (storyDao: StoryDao) extends Specification {
 
   "Events" should {
     "create a event" in new WithApplication{
@@ -21,7 +23,7 @@ class EventsSpec extends Specification {
         slug = "pepper-spray-events", source = Source("9dLmdVDjg1w","youtube",Some(1592000)), picture = Image("http://img.youtube.com/vi/9dLmdVDjg1w/0.jpg"), title = "Pepper Spray",
         tags = List("short-films"),
         privacy = "Unlisted")
-      Await.result(Story.collection.insert(newStory), 1.0 seconds)
+      Await.result(storyDao.insert(newStory), 1.0 seconds)
 
       val jsonBody: JsValue = JsObject(
         Seq("events" ->

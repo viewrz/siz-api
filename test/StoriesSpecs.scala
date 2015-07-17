@@ -1,18 +1,25 @@
 import java.util.Date
+import javax.inject.Inject
 
+import dao.StoryDao
 import models._
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
-import play.api.libs.json.{JsObject, JsString}
+import play.api.libs.json.{JsString, JsDefined, JsObject}
 import play.api.test.Helpers._
-import play.api.test.{FakeRequest, WithApplication}
+import play.api.test.{FakeApplication, FakeRequest, WithApplication}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
+import play.api.Application
+
 @RunWith(classOf[JUnitRunner])
 class StoriesSpec extends Specification {
+
+  val application = FakeApplication()
+  private val storyDao = Application.instanceCache[StoryDao].apply(application)
 
   "Stories" should {
     "Retrieve a unlisted story" in new WithApplication{
@@ -22,7 +29,7 @@ class StoriesSpec extends Specification {
         slug = "pepper-spray-stories", source = Source("9dLmdVDjg1w","youtube",Some(1592000)), picture = Image("http://img.youtube.com/vi/9dLmdVDjg1w/0.jpg"), title = "Pepper Spray",
         tags = List("short-films"),
         privacy = "Unlisted")
-      Await.result(Story.collection.insert(newStory), 1.0 seconds)
+      Await.result(storyDao.insert(newStory), 10.0 seconds)
 
       val createdToken = contentAsJson(route(FakeRequest(POST, "/tokens").withJsonBody(JsObject(Seq()))).get)
 
@@ -32,8 +39,8 @@ class StoriesSpec extends Specification {
       status(retrievedStory) must equalTo(OK)
       contentType(retrievedStory) must  beSome.which(_ == "application/json")
       val jsonEvent = contentAsJson(retrievedStory) \ "stories"
-      jsonEvent \ "id" mustEqual JsString(storyId)
-      jsonEvent \ "privacy" mustEqual JsString("Unlisted")
+      jsonEvent \ "id" mustEqual JsDefined(JsString(storyId))
+      jsonEvent \ "privacy" mustEqual JsDefined(JsString("Unlisted"))
     }
   }
 }

@@ -18,7 +18,8 @@ class GlobalErrorHandler extends HttpErrorHandler {
   Future[Result] = {
     statusCode match {
       case BAD_REQUEST =>
-        Future.successful(BadRequest(Error.toTopLevelJson(Error(message))))
+        Future.successful(BadRequest(Error.toTopLevelJson(
+          Error(message))))
       case NOT_FOUND =>
         Future.successful(NotFound(Error.toTopLevelJson(Error("This call does not exist, check the API documentation"))))
     }

@@ -31,3 +31,5 @@ javaOptions in Universal ++= Seq(
 )
 
 routesGenerator := InjectedRoutesGenerator
+
+fork in Test := false
