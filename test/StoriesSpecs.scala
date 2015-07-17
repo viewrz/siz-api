@@ -39,8 +39,8 @@ class StoriesSpec extends Specification {
       status(retrievedStory) must equalTo(OK)
       contentType(retrievedStory) must  beSome.which(_ == "application/json")
       val jsonEvent = contentAsJson(retrievedStory) \ "stories"
-      jsonEvent \ "id" mustEqual JsDefined(JsString(storyId))
-      jsonEvent \ "privacy" mustEqual JsDefined(JsString("Unlisted"))
+      (jsonEvent \ "id").as[String] mustEqual storyId
+      (jsonEvent \ "privacy").as[String] mustEqual "Unlisted"
     }
   }
 }

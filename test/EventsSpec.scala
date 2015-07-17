@@ -4,9 +4,10 @@ import dao.StoryDao
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
+import play.api.Application
 import play.api.libs.json.{JsArray, JsString, JsObject, JsValue}
 import play.api.test.Helpers._
-import play.api.test.{FakeRequest, WithApplication}
+import play.api.test.{FakeApplication, FakeRequest, WithApplication}
 import models._
 import java.util.Date
 
@@ -14,7 +15,10 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 
 @RunWith(classOf[JUnitRunner])
-class EventsSpec @Inject() (storyDao: StoryDao) extends Specification {
+class EventsSpec extends Specification {
+
+  val application = FakeApplication()
+  private val storyDao = Application.instanceCache[StoryDao].apply(application)
 
   "Events" should {
     "create a event" in new WithApplication{
@@ -23,7 +27,7 @@ class EventsSpec @Inject() (storyDao: StoryDao) extends Specification {
         slug = "pepper-spray-events", source = Source("9dLmdVDjg1w","youtube",Some(1592000)), picture = Image("http://img.youtube.com/vi/9dLmdVDjg1w/0.jpg"), title = "Pepper Spray",
         tags = List("short-films"),
         privacy = "Unlisted")
-      Await.result(storyDao.insert(newStory), 1.0 seconds)
+      Await.result(storyDao.insert(newStory), 10.0 seconds)
 
       val jsonBody: JsValue = JsObject(
         Seq("events" ->
@@ -42,9 +46,9 @@ class EventsSpec @Inject() (storyDao: StoryDao) extends Specification {
       status(createdEvent) must equalTo(CREATED)
       contentType(createdEvent) must  beSome.which(_ == "application/json")
       val jsonEvent = contentAsJson(createdEvent) \ "events"
-      jsonEvent \ "tags" mustEqual JsArray(List(JsString("short-films")))
-      jsonEvent \ "storyId" mustEqual JsString(storyId)
-      jsonEvent \ "type" mustEqual JsString("like")
+      (jsonEvent \ "tags").as[List[String]] mustEqual List("short-films")
+      (jsonEvent \ "storyId").as[String] mustEqual storyId
+      (jsonEvent \ "type").as[String] mustEqual "like"
     }
   }
 }
