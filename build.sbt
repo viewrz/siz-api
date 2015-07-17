@@ -12,14 +12,12 @@ lazy val root = (project in file("."))
 lazy val spracebook = uri("git://github.com/jdauphant/spracebook.git")
 
 resolvers ++= Seq(
-  "Spray" at "http://repo.spray.io/"
+  "Scalaz Bintray Repo" at "https://dl.bintray.com/scalaz/releases"
 )
 
 libraryDependencies ++= Seq(
   "org.reactivemongo" %% "play2-reactivemongo"  % "0.11.2.play24",
   "org.mindrot"       %  "jbcrypt"              % "0.3m",
-  "io.spray"          %% "spray-client"         % "1.3.2",
-  "io.spray"          %% "spray-json"           % "1.3.1",
   "com.kifi"          %% "franz"                % "0.3.10",
   specs2              %   Test,
   ws
