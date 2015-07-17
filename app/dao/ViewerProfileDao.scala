@@ -18,8 +18,7 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
  * Created by fred on 16/07/15.
  */
 @Singleton
-class ViewerProfileDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends ReactiveMongoComponents {
-  def insert (plop : ViewerProfile) = collection.insert(plop)
+class ViewerProfileDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) {
   lazy val db = reactiveMongoApi.db
 
   def collection: JSONCollection = db.collection[JSONCollection]("viewerprofiles")

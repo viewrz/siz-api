@@ -14,8 +14,10 @@ trait CommonJsonFormats {
     }
   }
 
-  def typeWrites[T](w: Writes[T]): Writes[T] = {
-    w.transform(js => js.as[JsObject] - "_type" ++ Json.obj("type" -> (js \ "_type").get))
+  def typeWrites[T](w: Writes[T]) = OWrites[T] {
+    a: T =>
+      val js = w.writes(a)
+      js.as[JsObject] - "_type" ++ Json.obj("type" -> (js \ "_type").get)
   }
 
   def typeReads[T](r: Reads[T]): Reads[T] = {

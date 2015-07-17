@@ -1,25 +1,24 @@
 package dao
 
-import javax.inject.{Singleton, Inject}
-
-import models.{Event, NewEvent}
+import javax.inject.{Inject, Singleton}
+import models.{NewEvent, Event}
+import play.modules.reactivemongo.ReactiveMongoApi
 import play.modules.reactivemongo.json.collection.JSONCollection
-import play.modules.reactivemongo.{ReactiveMongoComponents, ReactiveMongoApi}
+import play.api.libs.json._
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import reactivemongo.api.indexes.{IndexType, Index}
 import reactivemongo.bson.BSONObjectID
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 
-import play.modules.reactivemongo.json._
-import play.modules.reactivemongo.json.collection._
-import formats.MongoJsonFormats._
 
 /**
  * Created by fred on 16/07/15.
  */
 @Singleton
-class EventDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends ReactiveMongoComponents {
+class EventDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) {
 
+  implicit val eventRead = Json.reads[Event]
+  implicit val eventWrite = Json.writes[Event]
 
   lazy val db = reactiveMongoApi.db
 
