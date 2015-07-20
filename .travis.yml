@@ -5,7 +5,7 @@ jdk:
 scala:
 - 2.11.7
 before_install:
-- .travis_scripts/beforeInstall.sh
+- sudo .travis_scripts/beforeInstall.sh
 cache:
   directories:
   - '$HOME/.m2/repository'
@@ -15,8 +15,6 @@ install:
 before_script:
 - sbt allDependencies
 - mongod --version
-services:
-- mongodb
 env:
 - MONGODB_URI=mongodb://localhost:27017/siz
 notifications:
