@@ -9,7 +9,7 @@ addons:
     sources:
     - mongodb-upstart
     packages:
-    - mongodb-org-server=2.6.10
+    - mongodb-org-server
 cache:
   directories:
   - '$HOME/.m2/repository'
