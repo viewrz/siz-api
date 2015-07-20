@@ -5,7 +5,7 @@ jdk:
 scala:
 - 2.11.7
 before_install:
-- sudo ./.travis_scripts/beforeInstall.sh
+- .travis_scripts/beforeInstall.sh
 cache:
   directories:
   - '$HOME/.m2/repository'
