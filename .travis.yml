@@ -1,16 +1,20 @@
 language: scala
 jdk:
-- openjdk7
+- openjdk8
+- oraclejdk8
 scala:
-- 2.11.4
+- 2.11.7
+# travis forces us to go through legacy VM mode to use sudo and install mongodb from a third-party repo.
+before_install:
+- sudo .travis_scripts/beforeInstall.sh
 cache:
   directories:
   - '$HOME/.m2/repository'
   - '$HOME/.ivy2/cache'
 before_script:
-- sbt dependencies
-services:
-- mongodb
+- sbt allDependencies
+- mongod --version
+#- service mongod start
 env:
 - MONGODB_URI=mongodb://localhost:27017/siz
 notifications:

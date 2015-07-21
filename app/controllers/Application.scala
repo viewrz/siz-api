@@ -1,6 +1,9 @@
 package controllers
 
-import actions.{TokenCheckAction, LoggingAction}
+import javax.inject.{Inject, Singleton}
+
+import actions.{LoggingAction, TokenCheckAction}
+import dao.StoryDao
 import formats.APIJsonFormats
 import models._
 import play.api.libs.json.Json
@@ -8,18 +11,19 @@ import play.api.mvc._
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-object Application extends Controller with APIJsonFormats {
+@Singleton
+class Application @Inject()(storyDao: StoryDao, tokenCheckAction: TokenCheckAction) extends Controller with APIJsonFormats {
 
   def index = LoggingAction {
-    TokenCheckAction { request =>
-      val root = "https://"+request.host
+    tokenCheckAction { request =>
+      val root = "https://" + request.host
       val services = Map("users" -> s"$root/users",
         "emails" -> s"$root/emails",
         "usernames" -> s"$root/usernames",
         "tokens" -> s"$root/tokens",
         "stories" -> s"$root/stories"
       )
-      
+
       Ok(Json.toJson(TopLevel(links = Some(services))))
     }
   }
@@ -27,7 +31,7 @@ object Application extends Controller with APIJsonFormats {
   def health = LoggingAction {
     Action.async {
       request =>
-        Story.findRecommends(12).map {
+        storyDao.findRecommends(12).map {
           results =>
             val api = Map("api" -> Map("state" -> "active"))
             Ok(Json.toJson(api))

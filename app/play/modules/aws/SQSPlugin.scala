@@ -1,15 +1,16 @@
 package play.modules.aws
 
-import play.api._
-import com.kifi.franz._
+import javax.inject.Inject
+
 import com.amazonaws.regions.Regions
+import com.kifi.franz._
+import play.api._
 import play.api.libs.json.JsValue
 
 import scala.concurrent.ExecutionContext
 import scala.util.control.NonFatal
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-class SQSPlugin(app: Application) extends Plugin {
+class SQSPlugin @Inject() (implicit app: Application) extends Plugin {
   private var _helper: Option[SQSHelper] = None
   def helper = _helper.getOrElse(throw new RuntimeException("SQSPlugin error: no SQSHelper : maybe aws.access.key or aws.secret.key are missing"))
 

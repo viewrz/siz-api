@@ -1,39 +1,45 @@
 package formats
 
 import models._
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
-import play.api.libs.json.Reads._
-import play.modules.reactivemongo.json.BSONFormats
 
-trait MongoJsonFormats extends CommonJsonFormats {
-  import BSONFormats.BSONObjectIDFormat
+
+object MongoJsonFormats extends CommonJsonFormats {
+
+  import play.api.libs.json._
+  import play.api.libs.json.Reads._
 
   def mongoReadsObjectId[T](r: Reads[T]): Reads[T] = {
-    __.json.update((__ \ 'id).json.copyFrom((__ \ '_id \ '$oid).json.pick[JsString] )) andThen r
+    JsPath.json.update((JsPath \ 'id).json.copyFrom((JsPath \ '_id \ '$oid).json.pick[JsString])) andThen r
   }
 
-  def mongoWritesObjectId[T](w : Writes[T]): Writes[T] = {
-    w.transform( js => js.as[JsObject] - "id"  ++ Json.obj("_id" -> Json.obj("$oid" -> js \ "id")) )
+  def mongoWritesObjectId[T](w: Writes[T]) = OWrites[T] {
+    a: T =>
+      val js = w.writes(a)
+      js.as[JsObject] - "id" ++ Json.obj("_id" -> Json.obj("$oid" -> (js \ "id").get))
   }
 
   def mongoReadsStringId[T](r: Reads[T]): Reads[T] = {
-    __.json.update((__ \ 'id).json.copyFrom((__ \ '_id).json.pick[JsString] )) andThen r
+    JsPath.json.update((JsPath \ 'id).json.copyFrom((JsPath \ '_id).json.pick[JsString])) andThen r
   }
 
-  def mongoWritesStringId[T](w : Writes[T]): Writes[T] = {
-    w.transform( js => js.as[JsObject] - "id"  ++ Json.obj("_id" -> js \ "id"))
+  def mongoWritesStringId[T](w: Writes[T]) = OWrites[T] {
+    a: T =>
+      val js = w.writes(a)
+      js.as[JsObject] - "id" ++ Json.obj("_id" -> (js \ "id").get)
   }
-  def withDefault[A](key:String, default: List[String])(r:Reads[A]) = {
-    __.json.update((__ \ key).json.copyFrom((__ \ key).json.pick orElse Reads.pure(Json.toJson(default)))) andThen r
+
+  def withDefault[A](key: String, default: List[String])(r: Reads[A]) = {
+    JsPath.json.update((JsPath \ key).json.copyFrom((JsPath \ key).json.pick orElse Reads.pure(Json.toJson(default)))) andThen r
   }
 
   implicit val tokenRead = mongoReadsStringId[Token](Json.reads[Token])
   implicit val tokenWrite = mongoWritesStringId[Token](Json.writes[Token])
   implicit val userRead = mongoReadsObjectId[User](Json.reads[User])
   implicit val userWrite = mongoWritesObjectId[User](Json.writes[User])
+
   implicit val eventRead = typeReads[Event](mongoReadsObjectId[Event](Json.reads[Event]))
   implicit val eventWrite = typeWrites[Event](mongoWritesObjectId[Event](Json.writes[Event]))
+
   implicit val viewerProfileRead = withDefault("nopeStoryIds", List())(withDefault("likeStoryIds", List())(mongoReadsObjectId[ViewerProfile](Json.reads[ViewerProfile])))
   implicit val viewerProfileWrite = mongoWritesObjectId[ViewerProfile](Json.writes[ViewerProfile])
   implicit val videoFormatRead = typeReads[VideoFormat](Json.reads[VideoFormat])

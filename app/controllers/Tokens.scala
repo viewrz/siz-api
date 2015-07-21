@@ -1,6 +1,9 @@
 package controllers
 
+import javax.inject.Inject
+
 import actions.{TokenCheckAction, LoggingAction}
+import dao.{TokenDao, UserDao}
 
 import formats.APIJsonFormats
 import models._
@@ -10,16 +13,16 @@ import play.api.mvc.{BodyParsers, Action, Controller}
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-object Tokens extends Controller with APIJsonFormats {
+class Tokens @Inject()(userDao: UserDao, tokenDao: TokenDao, tokenCheckAction: TokenCheckAction, userController: Users) extends Controller with APIJsonFormats {
 
   // V1.0 compatibility
   def createDispatcher = LoggingAction {
     Action.async(BodyParsers.parse.tolerantJson) { request =>
-      (request.body \ "users") match {
-        case _: JsUndefined =>
+      (request.body \ "users").toOption match {
+        case None =>
           createToken
-        case obj: JsObject =>
-          Token.newToken.flatMap {
+        case Some(obj: JsObject) =>
+          tokenDao.newToken.flatMap {
             token =>
               update(token, obj)
           }
@@ -36,24 +39,24 @@ object Tokens extends Controller with APIJsonFormats {
     }
   }*/
 
-  def createToken = Token.newToken.map {
+  def createToken = tokenDao.newToken.map {
     token =>
       Created(Json.toJson(TopLevel(tokens = Some(token))))
   }
 
   // V1.0 and V1.1
   def updateDispatcher(tokenId: String) = LoggingAction {
-    TokenCheckAction.async(BodyParsers.parse.tolerantJson) { request =>
-      request.token.userId match {
-        case Some(_) =>
+    tokenCheckAction.async(BodyParsers.parse.tolerantJson) { request =>
+      (request.token.userId, (request.body \ "users").toOption) match {
+        case (Some(_), _) =>
           Future.successful(BadRequest(Error.toTopLevelJson("An user is already logged on this token, discard this token and create a new one.")))
-        case None =>
-          update(request.token, (request.body \ "users"))
+        case (None, Some(obj: JsObject)) =>
+          update(request.token, obj)
       }
     }
   }
 
-  def update(token: Token, obj: JsValue) = {
+  def update(token: Token, obj: JsObject) = {
     val userResult = obj.validate[LoginUser]
     userResult.fold(
       validationErrors => {
@@ -61,11 +64,11 @@ object Tokens extends Controller with APIJsonFormats {
       },
       loginUser => loginUser match {
         case LoginUser(Some(email), Some(passwordHash), None, None) =>
-          Users.loginByEmail(email, passwordHash)(token)
+          userController.loginByEmail(email, passwordHash)(token)
         case LoginUser(None, Some(passwordHash), Some(username), None) =>
-          Users.loginByUsername(username, passwordHash)(token)
+          userController.loginByUsername(username, passwordHash)(token)
         case LoginUser(None, None, None, Some(facebookToken)) =>
-          Users.loginByFacebook(facebookToken)(token)
+          userController.loginByFacebook(facebookToken)(token)
         case _ =>
           Future.successful(BadRequest(Error.toTopLevelJson(s"Missing fields to login")))
       }

@@ -2,9 +2,12 @@ import org.specs2.mutable._
 import org.specs2.runner._
 import org.junit.runner._
 import play.api.libs.json._
+import play.api.mvc
 
 import play.api.test._
 import play.api.test.Helpers._
+
+import scala.concurrent.Future
 
 object UserHelper {
   def createUser(email: String, password: String, username: String) = {
@@ -44,7 +47,15 @@ class UsersSpec extends Specification {
   "Users" should {
 
     "send 404 on /users" in new WithApplication{
-      route(FakeRequest(GET, "/users")) must beNone
+      private val response = route(FakeRequest(GET, "/users")).get
+      // /users is not accesible via GET
+      private val json = contentAsJson(response)
+
+      status(response) must equalTo(NOT_FOUND)
+      contentType(response) must beSome.which(_ == "application/json")
+
+      json \ "errors" mustNotEqual JsUndefined
+
     }
 
     "create a email user v1.0" in new WithApplication{
