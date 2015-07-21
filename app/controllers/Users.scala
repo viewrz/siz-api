@@ -32,13 +32,11 @@ class Users @Inject()(userDao: UserDao, tokenDao: TokenDao, tokenCheckAction: To
 
   def create = LoggingAction {
     tokenCheckAction.async(BodyParsers.parse.tolerantJson) { request =>
-      (request.token.userId, (request.body \ "users").toOption) match {
-        case (Some(_), _) =>
+      request.token.userId match {
+        case Some(_) =>
           Future.successful(BadRequest(Error.toTopLevelJson("An user is already logged on this token, discard this token and create a new one.")))
-        case (None, Some(obj: JsObject)) =>
-          createUser(request.token, obj)
-        case _ =>
-          Future.successful(BadRequest(Error.toTopLevelJson("'users' field missing")))
+        case None =>
+          createUser(request.token, request.body)
       }
     }
   }
@@ -218,3 +216,4 @@ class Users @Inject()(userDao: UserDao, tokenDao: TokenDao, tokenCheckAction: To
     }
   }
 }
+
