@@ -7,6 +7,7 @@ import dao.{TokenDao, UserDao}
 
 import formats.APIJsonFormats
 import models._
+import dto._
 import play.api.libs.json._
 import play.api.mvc.{BodyParsers, Action, Controller}
 

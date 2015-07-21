@@ -10,6 +10,7 @@ import dao.{TokenDao, UserDao}
 import formats.APIJsonFormats
 import models.User.UserName
 import models._
+import dto._
 import play.api.Play.current
 import play.api._
 import play.api.libs.concurrent.Akka

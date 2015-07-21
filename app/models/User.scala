@@ -10,17 +10,6 @@ case class User(email: Option[User.Email],
                 facebookUserId: Option[String],
                 creationDate: Date,
                 state: Option[String] = None)
-
-case class NewUser(email: Option[User.Email],
-                   password: Option[User.Password],
-                   username: Option[User.UserName],
-                   facebookToken: Option[String])
-
-case class LoginUser(email: Option[User.Email],
-                     password: Option[User.Password],
-                     username: Option[User.UserName],
-                     facebookToken: Option[String])
-
 object User {
   type UserName = String
   type Email = String

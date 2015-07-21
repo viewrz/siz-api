@@ -4,7 +4,8 @@ package dao
 import java.util.Date
 import javax.inject.{Singleton, Inject}
 
-import models.{NewUser, User}
+import models.User
+import dto.NewUser
 import models.User._
 import play.api.libs.json.Json
 import play.modules.reactivemongo.{ReactiveMongoComponents, ReactiveMongoApi}

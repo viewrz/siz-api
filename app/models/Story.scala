@@ -10,9 +10,6 @@ case class Box(height: Option[Int],
                stop: Option[Long],
                formats: Option[List[VideoFormat]])
 
-case class NewBox(start: Long,
-                  stop: Long)
-
 case class Image(href: String)
 
 case class Loop(formats: List[VideoFormat])
@@ -31,8 +28,3 @@ case class Story(boxes: List[Box],
                  tags: List[String],
                  privacy: String,
                  loop: Option[Loop] = None)
-
-case class NewStory(boxes: List[NewBox],
-                    source: Source,
-                    title: String,
-                    tags: List[String])

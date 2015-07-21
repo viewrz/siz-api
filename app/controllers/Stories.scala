@@ -7,6 +7,7 @@ import dao.{ViewerProfileDao, StoryDao}
 import formats.APIJsonFormats
 
 import models._
+import dto._
 import play.api.mvc._
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext

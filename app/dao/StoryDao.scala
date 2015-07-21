@@ -1,17 +1,15 @@
 package dao
 
-import java.util.Date
 import javax.inject.{Singleton, Inject}
 
-import models.{NewBox, Story, Image, Box}
 import models._
+import dto._
 import play.api.PlayException
 import play.api.libs.json.Json
 import play.modules.reactivemongo.json.collection.JSONCollection
 import play.modules.reactivemongo.{ReactiveMongoComponents, ReactiveMongoApi}
 import reactivemongo.api.QueryOpts
 import reactivemongo.api.indexes.{IndexType, Index}
-import reactivemongo.bson.BSONObjectID
 import utils.{Queue, Slug}
 
 import play.modules.reactivemongo.json._
@@ -52,26 +50,6 @@ class StoryDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Reactiv
 
   def insert(story: Story) = collection.insert(story)
 
-  private def newBoxToBox(newBox: NewBox) =
-    Box(height = None,
-      width = None,
-      start = Some(newBox.start),
-      stop = Some(newBox.stop),
-      formats = None)
-
-  private def pictureFromSource(source: Source) = Image(s"//img.youtube.com/vi/${source.id}/0.jpg")
-
-  def newStoryToStory(newStory: NewStory, slug: String) =
-    Story(boxes = newStory.boxes.map(newBoxToBox),
-      creationDate = new Date(), BSONObjectID.generate.stringify,
-      slug = slug,
-      source = newStory.source,
-      picture = pictureFromSource(newStory.source),
-      title = newStory.title,
-      tags = newStory.tags,
-      privacy = "Unlisted",
-      loop = None)
-
   def getBySlug(slug: String) = collection.find(Json.obj("slug" -> slug)).cursor[Story]().collect[List]().map(_.headOption)
 
   def getById(id: String) = collection.find(Json.obj("_id" -> Json.obj("$oid" -> id))).cursor[Story]().collect[List]().map(_.headOption)
@@ -97,7 +75,7 @@ class StoryDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Reactiv
 
   def generateStory(newStory: NewStory) = {
     generateValidSlug(newStory.title).flatMap { slug =>
-      val story = newStoryToStory(newStory, slug)
+      val story = newStory.toStory(slug)
       Queue.send("generate.story", Json.toJson(story)).map(_ => story)
     }
   }

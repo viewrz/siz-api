@@ -1,6 +1,7 @@
 package formats
 
 import models._
+import dto._
 import play.api.data.validation.ValidationError
 import play.api.libs.json.Reads._
 import play.api.libs.json._
