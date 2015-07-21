@@ -30,26 +30,6 @@ import scala.language.postfixOps
 @Singleton
 class Users @Inject()(userDao: UserDao, tokenDao: TokenDao, tokenCheckAction: TokenCheckAction) extends Controller with APIJsonFormats {
 
-  // V1.0 compatibility
-  def createDispatcher = LoggingAction {
-    Action.async(BodyParsers.parse.tolerantJson) { request =>
-      request.headers.get(access_token_header) match {
-        case None =>
-          tokenDao.newToken.flatMap {
-            token =>
-              createUser(token, request.body)
-          }
-        case Some(access_token) =>
-          tokenDao.findById(access_token).flatMap {
-            case token :: Nil if token.id == access_token =>
-              createUser(token, request.body)
-            case _ =>
-              Future.successful(Unauthorized(Error.toTopLevelJson(Error(s"Unknown token $access_token"))))
-          }
-      }
-    }
-  }
-
   def create = LoggingAction {
     tokenCheckAction.async(BodyParsers.parse.tolerantJson) { request =>
       (request.token.userId, (request.body \ "users").toOption) match {
