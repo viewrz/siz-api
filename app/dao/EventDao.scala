@@ -11,9 +11,6 @@ import reactivemongo.bson.BSONObjectID
 
 
 
-/**
- * Created by fred on 16/07/15.
- */
 @Singleton
 class EventDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) {
 

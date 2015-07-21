@@ -8,9 +8,6 @@ import play.api.mvc.{Result, RequestHeader}
 import scala.concurrent.Future
 import play.mvc.Http.Status._
 
-/**
- * Created by fred on 16/07/15.
- */
 class GlobalErrorHandler extends HttpErrorHandler {
   override def onClientError(request: RequestHeader,
                              statusCode: Int,

@@ -19,9 +19,6 @@ import formats.MongoJsonFormats._
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-/**
- * Created by fred on 16/07/15.
- */
 @Singleton
 class TokenDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends ReactiveMongoComponents {
   lazy val db = reactiveMongoApi.db

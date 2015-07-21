@@ -22,9 +22,6 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import scala.concurrent.{Awaitable, Future}
 
-/**
- * Created by fred on 16/07/15.
- */
 @Singleton
 class StoryDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends ReactiveMongoComponents {
   lazy val db = reactiveMongoApi.db

@@ -14,9 +14,6 @@ import scala.concurrent.Future
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-/**
- * Created by fred on 16/07/15.
- */
 @Singleton
 class ViewerProfileDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) {
   lazy val db = reactiveMongoApi.db
