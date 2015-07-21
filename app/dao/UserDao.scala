@@ -40,15 +40,6 @@ class UserDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Reactive
     collection.indexesManager.ensure(Index(Seq("facebookUserId" -> IndexType.Ascending), name = Some("facebookUserIdUniqueIndex"), unique = true, sparse = true))
   }
 
-  def fromNewUser(newUser: NewUser, facebookUserId: Option[String] = None, userId: Option[String] = None): User = new User(
-    newUser.email,
-    newUser.password.map(Hash.bcrypt),
-    userId.getOrElse(BSONObjectID.generate.stringify),
-    newUser.username,
-    newUser.facebookToken,
-    facebookUserId,
-    new Date())
-
   def create(user: User) = collection.insert(user)
 
   def findById(id: String) = collection.find(Json.obj("_id" -> Json.obj("$oid" -> id))).cursor[User]().collect[List]()

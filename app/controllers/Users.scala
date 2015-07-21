@@ -87,14 +87,14 @@ class Users @Inject()(userDao: UserDao, tokenDao: TokenDao, tokenCheckAction: To
   }
 
   def createUserByEmail(user: NewUser)(token: Token): Future[Result] = {
-    val newUser = userDao.fromNewUser(user, userId = Some(token.viewerProfileId))
+    val newUser = user.toUser(userId = Some(token.viewerProfileId))
     createUser(newUser)(token)
   }
 
   def createUserByFacebook(user: NewUser, facebookToken: String)(token: Token): Future[Result] = {
     retrieveFacebookUserId(facebookToken).flatMap {
       facebookUserId =>
-        val newUser = userDao.fromNewUser(user, Some(facebookUserId), Some(token.viewerProfileId))
+        val newUser = user.toUser(Some(facebookUserId), Some(token.viewerProfileId))
         createUser(newUser)(token)
     }.recover {
       case exception: FacebookException if exception.exceptionType == "OAuthException" =>
