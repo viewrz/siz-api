@@ -17,6 +17,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     mongo.vm.provider "docker" do |d|
       d.image = "mongo"
       d.name = "siz-api-mongo"
+      d.ports = ["27017:27017"]
       d.cmd = ["mongod", "--smallfiles"]
     end
   end
