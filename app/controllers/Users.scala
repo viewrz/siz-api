@@ -56,6 +56,8 @@ class Users @Inject()(userDao: UserDao, tokenDao: TokenDao, tokenCheckAction: To
           Future.successful(BadRequest(Error.toTopLevelJson("An user is already logged on this token, discard this token and create a new one.")))
         case (None, Some(obj: JsObject)) =>
           createUser(request.token, obj)
+        case _ =>
+          Future.successful(BadRequest(Error.toTopLevelJson("'users' field missing")))
       }
     }
   }
@@ -128,7 +130,6 @@ class Users @Inject()(userDao: UserDao, tokenDao: TokenDao, tokenCheckAction: To
       userDao.findByEmail(email).map {
         case user :: Nil =>
           Ok(Json.toJson(Map("emails" -> Email(email, "registered"))))
-        // match no result or a list bigger than one.
         case _ =>
           NotFound(Error.toTopLevelJson(Error("Email not found")))
       }

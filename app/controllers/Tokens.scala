@@ -52,6 +52,8 @@ class Tokens @Inject()(userDao: UserDao, tokenDao: TokenDao, tokenCheckAction: T
           Future.successful(BadRequest(Error.toTopLevelJson("An user is already logged on this token, discard this token and create a new one.")))
         case (None, Some(obj: JsObject)) =>
           update(request.token, obj)
+        case _ =>
+          Future.successful(BadRequest(Error.toTopLevelJson("'users field missing")))
       }
     }
   }

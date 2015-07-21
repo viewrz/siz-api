@@ -2,20 +2,6 @@ package models
 
 import java.util.Date
 
-import play.api.Play.current
-import play.api.PlayException
-import play.api.libs.json.Json
-import reactivemongo.api.QueryOpts
-import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.bson.BSONObjectID
-import utils.{Queue, Slug}
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-
-import play.modules.reactivemongo.json._
-
-
 case class VideoFormat(href: String, _type: String)
 
 case class Box(height: Option[Int],

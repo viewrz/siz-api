@@ -23,7 +23,7 @@ class ViewerProfileDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) {
 
   def collection: JSONCollection = db.collection[JSONCollection]("viewerprofiles")
 
-  def findById(id: String): Future[ViewerProfile] = collection.find(Json.obj("_id" -> Json.obj("$oid" -> id))).cursor[ViewerProfile].collect[List]().map {
+  def findById(id: String): Future[ViewerProfile] = collection.find(Json.obj("_id" -> Json.obj("$oid" -> id))).cursor[ViewerProfile]().collect[List]().map {
     case vp :: Nil =>
       vp
     case _ =>

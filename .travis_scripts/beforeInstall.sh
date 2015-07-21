@@ -9,5 +9,3 @@ echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | 
 apt-get update
 apt-get install mongodb-org-server=2.6.10
 apt-get install mongodb-org-shell=2.6.10
-
-#service mongod start

@@ -45,10 +45,10 @@ class StoryDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Reactiv
     collection.find(Json.obj("_id" -> Json.obj("$nin" -> exceptStoryIds.map(id => Json.obj("$oid" -> id))),
       "tags" -> Json.obj("$not" -> Json.obj("$elemMatch" -> Json.obj("$in" -> exceptTags))),
       "privacy" -> Json.obj("$nin" -> Json.arr(List("Unlisted", "Private")))
-    )).options(QueryOpts().batchSize(limit)).sort(Json.obj(orderBy -> -1)).cursor[Story].collect[List](limit)
+    )).options(QueryOpts().batchSize(limit)).sort(Json.obj(orderBy -> -1)).cursor[Story]().collect[List](limit)
 
   def getByIds(ids: List[String]) =
-    collection.find(Json.obj("_id" -> Json.obj("$in" -> ids.map(id => Json.obj("$oid" -> id))))).cursor[Story].collect[List]()
+    collection.find(Json.obj("_id" -> Json.obj("$in" -> ids.map(id => Json.obj("$oid" -> id))))).cursor[Story]().collect[List]()
 
   def insert(story: Story) = collection.insert(story)
 
