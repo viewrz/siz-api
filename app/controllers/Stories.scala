@@ -2,8 +2,8 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
-import actions.{LoggingAction, TokenCheckAction}
-import dao.{ViewerProfileDao, StoryDao}
+import actions.{TokenRequest, LoggingAction, TokenCheckAction}
+import dao.{TokenDao, ViewerProfileDao, StoryDao}
 import formats.APIJsonFormats
 
 import models._
@@ -11,12 +11,13 @@ import dto._
 import play.api.mvc._
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
+import service.StoryService
 
 import scala.concurrent.Future
 
 @Singleton
-class Stories @Inject()(storyDao: StoryDao, tokenCheckAction: TokenCheckAction, viewerProfileDao: ViewerProfileDao) extends Controller with APIJsonFormats {
+class Stories @Inject()(tokenDao: TokenDao, storyService: StoryService, storyDao: StoryDao, tokenCheckAction: TokenCheckAction, viewerProfileDao: ViewerProfileDao) extends Controller with APIJsonFormats {
 
   def dispatcher(limit: Int, orderBy: String, filterBy: String, slug: Option[String], sinceId: Option[String], lastSkippedId: Option[String]) = LoggingAction {
     tokenCheckAction.async { request =>
@@ -24,7 +25,7 @@ class Stories @Inject()(storyDao: StoryDao, tokenCheckAction: TokenCheckAction, 
         case None =>
           find(limit, orderBy, request.token.viewerProfileId, request.token.userId.isDefined, filterBy, sinceId, lastSkippedId)
         case Some(slug) =>
-          getBySlug(slug)
+          getBySlug(slug)(request)
       }
     }
   }
@@ -86,7 +87,7 @@ class Stories @Inject()(storyDao: StoryDao, tokenCheckAction: TokenCheckAction, 
     }
   }
 
-  def getBySlug(slug: String) = storyDao.getBySlug(slug).map {
+  def getBySlug(slug: String)(implicit request: TokenRequest[_]) = storyService.getBySlug(slug, request.token, request.remoteAddress).map {
     case None =>
       NotFound(Error.toTopLevelJson(Error("No story for this slug %s".format(slug))))
     case Some(story) =>

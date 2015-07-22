@@ -1,5 +1,4 @@
 import java.util.Date
-import javax.inject.Inject
 
 import dao.StoryDao
 import models._
@@ -25,7 +24,8 @@ class StoriesSpec extends Specification {
     "Retrieve a unlisted story" in new WithApplication{
       val storyId = "14339467864855da8fe28615"
       val privacy = "Unlisted"
-      val newStory = Story(boxes = List(), creationDate = new Date(), id = storyId,
+      val newStory = Story(boxes = List(),
+        creationDate = new Date(), id = storyId,
         slug = "pepper-spray-stories", source = Source("9dLmdVDjg1w","youtube",Some(1592000)), picture = Image("http://img.youtube.com/vi/9dLmdVDjg1w/0.jpg"), title = "Pepper Spray",
         tags = List("short-films"),
         privacy = "Unlisted")
