@@ -30,35 +30,13 @@ import scala.language.postfixOps
 @Singleton
 class Users @Inject()(userDao: UserDao, tokenDao: TokenDao, tokenCheckAction: TokenCheckAction) extends Controller with APIJsonFormats {
 
-  // V1.0 compatibility
-  def createDispatcher = LoggingAction {
-    Action.async(BodyParsers.parse.tolerantJson) { request =>
-      request.headers.get(access_token_header) match {
-        case None =>
-          tokenDao.newToken.flatMap {
-            token =>
-              createUser(token, request.body)
-          }
-        case Some(access_token) =>
-          tokenDao.findById(access_token).flatMap {
-            case token :: Nil if token.id == access_token =>
-              createUser(token, request.body)
-            case _ =>
-              Future.successful(Unauthorized(Error.toTopLevelJson(Error(s"Unknown token $access_token"))))
-          }
-      }
-    }
-  }
-
   def create = LoggingAction {
     tokenCheckAction.async(BodyParsers.parse.tolerantJson) { request =>
-      (request.token.userId, (request.body \ "users").toOption) match {
-        case (Some(_), _) =>
+      request.token.userId match {
+        case Some(_) =>
           Future.successful(BadRequest(Error.toTopLevelJson("An user is already logged on this token, discard this token and create a new one.")))
-        case (None, Some(obj: JsObject)) =>
-          createUser(request.token, obj)
-        case _ =>
-          Future.successful(BadRequest(Error.toTopLevelJson("'users' field missing")))
+        case None =>
+          createUser(request.token, request.body)
       }
     }
   }
@@ -238,3 +216,4 @@ class Users @Inject()(userDao: UserDao, tokenDao: TokenDao, tokenCheckAction: To
     }
   }
 }
+
