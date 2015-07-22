@@ -25,16 +25,6 @@ class TokenDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Reactiv
 
   def collection: JSONCollection = db.collection[JSONCollection]("tokens")
 
-  val TOKEN_ID_SIZE = 64
-
-  private def generatedId = Random.alphanumeric.take(TOKEN_ID_SIZE).mkString
-
-  def newToken = {
-    val token = new Token(generatedId, BSONObjectID.generate.stringify)
-    val futureToken = create(token)
-    futureToken.map(_ => token)
-  }
-
   def updateToken(token: Token, userId: String): Future[Token] = {
     token.userId match {
       case None =>

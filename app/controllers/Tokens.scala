@@ -10,16 +10,17 @@ import models._
 import dto._
 import play.api.libs.json._
 import play.api.mvc.{BodyParsers, Action, Controller}
+import service.TokenService
 
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-class Tokens @Inject()(userDao: UserDao, tokenDao: TokenDao, tokenCheckAction: TokenCheckAction, userController: Users) extends Controller with APIJsonFormats {
+class Tokens @Inject()(userDao: UserDao, tokenService: TokenService, tokenCheckAction: TokenCheckAction, userController: Users) extends Controller with APIJsonFormats {
 
 
   def create = LoggingAction {
     Action.async(BodyParsers.parse.tolerantJson) { request =>
-      tokenDao.newToken.map {
+      tokenService.newToken(request.remoteAddress).map {
         token =>
           Created(Json.toJson(TopLevel(tokens = Some(token))))
       }
