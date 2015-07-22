@@ -27,7 +27,7 @@ class Events @Inject()(viewerProfileDao: ViewerProfileDao, storyDao: StoryDao, e
           case None =>
             Future.successful(NotFound(Error.toTopLevelJson(Error("No story for this id %s".format(newEvent.storyId)))))
           case Some(story) =>
-            val event = eventDao.newEventToEvent(newEvent, request.token.viewerProfileId, story.tags)
+            val event = eventDao.newEventToEvent(newEvent, request.token.viewerProfileId, story.tags, request.remoteAddress)
             eventDao.addEvent(event).flatMap { _ =>
               viewerProfileDao.processEvent(event).map(_ => Created(Json.toJson(TopLevel(events = Some(event)))))
             }

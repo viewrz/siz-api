@@ -2,21 +2,13 @@ package tokenip
 
 import java.util.Date
 
-import play.api.mvc.AnyContentAsEmpty
-import play.api.test._
-import play.api.test.Helpers._
-
-import actions.{TokenCheckAction, TokenRequest}
-import controllers.Stories
-import dao.{StoryDao, TokenDao, ViewerProfileDao}
+import dao.{EventDao, StoryDao, TokenDao}
 import models._
 import org.junit.runner.RunWith
 import org.specs2.mock.Mockito
 import org.specs2.mutable._
 import org.specs2.runner._
-
-import org.mockito.Mockito._
-import service.StoryService
+import service.{TokenService, StoryService}
 
 import scala.concurrent.Future
 
@@ -25,18 +17,21 @@ import scala.concurrent.Future
 class TokenIpSpec extends Specification with Mockito {
 
   trait Context extends Before {
-    val tokenDao = mock[TokenDao]
     val storyDao = mock[StoryDao]
-    val storyService = new StoryService(tokenDao, storyDao)
+    val eventDao = mock[EventDao]
+    val tokenDao = mock[TokenDao]
+    val storyService = new StoryService(eventDao, storyDao)
+
+    val tokenService = new TokenService(tokenDao, eventDao)
 
     def before() = {}
   }
 
   "When a new user (no user account) sees a story in his browser, the mobile app  " should {
     "show the same video" >> {
-      "by recording user info each time the token is used" in new Context {
+      "by recording user info each time he gets a video by slug" in new Context {
 
-        private val token = new Token("any-id", "any-viewerprofile", None, None, None)
+        private val token = new Token("any-id", "any-viewerprofile", None)
 
         val anyStory = Story(
           boxes = List(),
@@ -53,24 +48,17 @@ class TokenIpSpec extends Specification with Mockito {
 
         storyService.getBySlug(slug = "the-slug", token, "the-remote-ip")
 
-        there was one(tokenDao).updateToken(new Token("any-id",
-          "any-viewerprofile",
-          None,
-          Some("the-remote-ip"),
-          Some("token-ip-story-id")))
-
+        there was one(eventDao).addEvent(any[Event])
       }
-      "when creating a token, check the last seen videostrip for that ip and bind it to the token properties" in new Context {
+      """when creating a token, check the last seen videostrip for
+        |that ip and bind it to the token properties""".stripMargin in new Context {
 
-        private val token = new Token("any-id", "any-viewerprofile", None, None, None)
 
-        storyService.getBySlug(slug = "the-slug", token, "the-remote-ip")
 
-        there was one(tokenDao).updateToken(new Token("any-id",
-          "any-viewerprofile",
-          None,
-          Some("the-remote-ip"),
-          Some("token-ip-story-id")))
+
+
+
+
 
       }
     }
