@@ -23,26 +23,19 @@ class Stories @Inject()(tokenDao: TokenDao, storyService: StoryService, storyDao
     tokenCheckAction.async { request =>
       slug match {
         case None =>
-          find(limit, orderBy, request.token.viewerProfileId, request.token.userId.isDefined, filterBy, sinceId, lastSkippedId)
+          find(limit, orderBy, request.token.viewerProfileId, request.token, filterBy, sinceId, lastSkippedId)
         case Some(slug) =>
           getBySlug(slug)(request)
       }
     }
   }
 
-  def find(limit: Int, orderBy: String, viewerProfileId: String, tagsFilter: Boolean, filterBy: String, sinceId: Option[String], lastSkippedId: Option[String]) = {
-    val removeTagsWithWeight = -3
+  def find(limit: Int, orderBy: String, viewerProfileId: String, token: Token, filterBy: String, sinceId: Option[String], lastSkippedId: Option[String]) = {
     viewerProfileDao.findById(viewerProfileId).flatMap {
       viewerProfile =>
-        val filteredTags = tagsFilter match {
-          case true =>
-            viewerProfile.tagsFilterBy(_._2 <= removeTagsWithWeight)
-          case false =>
-            List()
-        }
         filterBy match {
           case "recommends" =>
-            val futureStories = storyDao.findRecommends(limit, orderBy, viewerProfile.likeStoryIds ::: viewerProfile.nopeStoryIds, filteredTags)
+            val futureStories = storyService.findRecommends(limit, orderBy, viewerProfile, token)
             futureStories.map {
               results =>
                 Ok(Json.toJson(TopLevel(stories = Some(Right(results)))))

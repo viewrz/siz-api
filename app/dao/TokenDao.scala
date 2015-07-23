@@ -25,11 +25,11 @@ class TokenDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Reactiv
 
   def collection: JSONCollection = db.collection[JSONCollection]("tokens")
 
-  def updateToken(token: Token, userId: String): Future[Token] = {
+  def update(token: Token, userId: String): Future[Token] = {
     token.userId match {
       case None =>
         val newToken = new Token(token.id, userId, Some(userId))
-        updateToken(newToken).map(_ => newToken)
+        update(newToken).map(_ => newToken)
       case _ =>
         Logger.error("Try to update an already connected token")
         Future.successful(token)
@@ -40,5 +40,5 @@ class TokenDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Reactiv
 
   def findById(id: String) = collection.find(Json.obj("_id" -> id)).cursor[Token]().collect[List]()
 
-  def updateToken(token: Token) = collection.update(Json.obj("_id" -> token.id), token)
+  def update(token: Token) = collection.update(Json.obj("_id" -> token.id), token)
 }

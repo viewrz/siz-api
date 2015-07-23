@@ -8,8 +8,7 @@ import org.junit.runner.RunWith
 import org.specs2.mock.Mockito
 import org.specs2.mutable._
 import org.specs2.runner._
-import reactivemongo.api.commands.{DefaultWriteResult, WriteResult}
-import services.{TokenService, StoryService}
+import reactivemongo.api.commands.WriteResult
 
 import scala.concurrent.Future
 
@@ -23,7 +22,7 @@ class ShowLastStoryToNewUserSpec extends Specification with Mockito {
     val storyDao = mock[StoryDao]
     val eventDao = mock[EventDao]
     val tokenDao = mock[TokenDao]
-    val storyService = new StoryService(eventDao, storyDao)
+    val storyService = new StoryService(eventDao, storyDao, tokenDao)
 
     val tokenService = new TokenService(tokenDao, eventDao)
 
@@ -31,24 +30,23 @@ class ShowLastStoryToNewUserSpec extends Specification with Mockito {
   }
 
   "When a new user (no user account) sees a story in his browser, the mobile app  " should {
+    val storyToShow = Story(
+      boxes = List(),
+      creationDate = new Date(),
+      id = "story-id-to-show",
+      slug = "the-slug",
+      source = Source("9dLmdVDjg1w", "youtube", Some(1592000)),
+      picture = Image("http://img.youtube.com/vi/9dLmdVDjg1w/0.jpg"),
+      title = "Pepper Spray",
+      tags = List("short-films"),
+      privacy = "Unlisted")
+
     "show the same video" >> {
       "by recording user info each time he gets a video by slug" in new Context {
 
-        private val token = new Token("any-id", "any-viewerprofile", None)
+        private val token = Token("any-id", "any-viewerprofile", None)
 
-        val anyStory = Story(
-          boxes = List(),
-          creationDate = new Date(),
-          id = "token-ip-story-id",
-          slug = "the-slug",
-          source = Source("9dLmdVDjg1w", "youtube", Some(1592000)),
-          picture = Image("http://img.youtube.com/vi/9dLmdVDjg1w/0.jpg"),
-          title = "Pepper Spray",
-          tags = List("short-films"),
-          privacy = "Unlisted")
-
-        storyDao.getBySlug("the-slug") returns Future.successful(Option(anyStory))
-
+        storyDao.getBySlug("the-slug") returns Future.successful(Option(storyToShow))
         storyService.getBySlug(slug = "the-slug", token, "the-remote-ip")
 
         there was one(eventDao).addEvent(any[Event])
@@ -68,6 +66,25 @@ class ShowLastStoryToNewUserSpec extends Specification with Mockito {
 
         val token = Await.result(tokenService.newToken("ip-that-visit-story-id"), 1.0 seconds)
         token.storyIdToShow must beSome.which(_ == "story-id-to-show")
+      }
+
+      """the first time recommends is called the stories to show is
+        |first on the return list and it's remove from the token""".stripMargin in new Context {
+        val token = Token("any-id",
+          "any-viewerprofile",
+          None,
+          storyIdToShow = Some("story-id-to-show")
+        )
+
+        val viewerProfil = ViewerProfile("viewerProfileIds")
+
+        storyDao.getById("story-id-to-show") returns Future.successful(Option(storyToShow))
+        storyDao.findRecommends(anyInt, anyString, any[List[String]], any[List[String]]) returns Future.successful(List())
+
+        val stories = Await.result(storyService.findRecommends(10,"creationDate",viewerProfil,token), 1.0 seconds)
+        stories.head mustEqual storyToShow
+
+        there was one(tokenDao).update(token.copy(storyIdToShow = None))
       }
     }
   }

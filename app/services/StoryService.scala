@@ -2,12 +2,14 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
-import dao.{EventDao, StoryDao}
+import dao.{TokenDao, EventDao, StoryDao}
 import models._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 @Singleton
-class StoryService @Inject()(eventDao: EventDao, storyDao: StoryDao) {
+class StoryService @Inject()(eventDao: EventDao, storyDao: StoryDao, tokenDao: TokenDao) {
+  private val removeTagsWithWeight = -5
+
   def getBySlug(slug: String, token: Token, ip: String) = storyDao.getBySlug(slug).map { story =>
     (story, token.userId) match {
       case (Some(story), None) =>
@@ -27,5 +29,29 @@ class StoryService @Inject()(eventDao: EventDao, storyDao: StoryDao) {
       // If the user is already connected we simply retrieve the story
     }
     story
+  }
+
+  def findRecommends(limit: Int, orderBy: String, viewerProfile: ViewerProfile, token: Token) = {
+    val filteredTags = token.userId.isDefined match {
+      case true =>
+        viewerProfile.tagsFilterBy(_._2 <= removeTagsWithWeight)
+      case false =>
+        List()
+    }
+    val exceptStoryIds = viewerProfile.likeStoryIds ::: viewerProfile.nopeStoryIds
+    val futureStories = storyDao.findRecommends(limit, orderBy, exceptStoryIds, filteredTags)
+    token.storyIdToShow match {
+      case Some(storyId) =>
+        // If we have a storyIdToShow, inject this story in first place and remove it from the token
+        tokenDao.update(token.copy(storyIdToShow = None))
+        storyDao.getById(storyId).flatMap {
+          case Some(story) =>
+            futureStories.map(story :: _)
+          case None =>
+            futureStories
+        }
+      case None =>
+        futureStories
+    }
   }
 }
