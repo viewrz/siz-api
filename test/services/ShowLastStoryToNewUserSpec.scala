@@ -1,4 +1,4 @@
-package tokenip
+package services
 
 import java.util.Date
 
@@ -9,7 +9,7 @@ import org.specs2.mock.Mockito
 import org.specs2.mutable._
 import org.specs2.runner._
 import reactivemongo.api.commands.{DefaultWriteResult, WriteResult}
-import service.{TokenService, StoryService}
+import services.{TokenService, StoryService}
 
 import scala.concurrent.Future
 
@@ -17,7 +17,7 @@ import scala.concurrent.duration._
 import scala.concurrent.Await
 
 @RunWith(classOf[JUnitRunner])
-class TokenIpSpec extends Specification with Mockito {
+class ShowLastStoryToNewUserSpec extends Specification with Mockito {
 
   trait Context extends Before {
     val storyDao = mock[StoryDao]

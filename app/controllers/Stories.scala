@@ -12,7 +12,7 @@ import play.api.mvc._
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.{JsValue, Json}
-import service.StoryService
+import services.StoryService
 
 import scala.concurrent.Future
 

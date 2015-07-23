@@ -10,7 +10,7 @@ import models._
 import dto._
 import play.api.libs.json._
 import play.api.mvc.{BodyParsers, Action, Controller}
-import service.TokenService
+import services.TokenService
 
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
