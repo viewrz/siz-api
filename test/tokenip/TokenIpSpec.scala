@@ -8,10 +8,13 @@ import org.junit.runner.RunWith
 import org.specs2.mock.Mockito
 import org.specs2.mutable._
 import org.specs2.runner._
+import reactivemongo.api.commands.{DefaultWriteResult, WriteResult}
 import service.{TokenService, StoryService}
 
 import scala.concurrent.Future
 
+import scala.concurrent.duration._
+import scala.concurrent.Await
 
 @RunWith(classOf[JUnitRunner])
 class TokenIpSpec extends Specification with Mockito {
@@ -53,13 +56,18 @@ class TokenIpSpec extends Specification with Mockito {
       """when creating a token, check the last seen videostrip for
         |that ip and bind it to the token properties""".stripMargin in new Context {
 
+        val event = Event("story-id-to-show",
+          "anonymous-view",
+          List(),
+          "any-viewerProfileId",
+          ip = "ip-that-visit-story-id"
+        )
 
+        eventDao.findLastOne("ip-that-visit-story-id", "anonymous-view") returns Future.successful(Option(event))
+        tokenDao.create(any[Token]) returns Future.successful{ mock[WriteResult] }
 
-
-
-
-
-
+        val token = Await.result(tokenService.newToken("ip-that-visit-story-id"), 1.0 seconds)
+        token.storyIdToShow must beSome.which(_ == "story-id-to-show")
       }
     }
   }
