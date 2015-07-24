@@ -71,7 +71,7 @@ class Stories @Inject()(tokenDao: TokenDao, storyService: StoryService, storyDao
 
   def getById(id: String) = LoggingAction {
     tokenCheckAction.async { request =>
-      storyDao.getById(id).map {
+      storyService.getById(id,request.token).map {
         case None =>
           NotFound(Error.toTopLevelJson(Error("No story for this id %s".format(id))))
         case Some(story) =>

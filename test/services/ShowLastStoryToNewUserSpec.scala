@@ -86,6 +86,24 @@ class ShowLastStoryToNewUserSpec extends Specification with Mockito {
 
         there was one(tokenDao).update(token.copy(storyIdToShow = None))
       }
+
+      "if the story-id-to-show is retrieve by id it's remove from the token" in new Context {
+        val token = Token("any-id",
+          "any-viewerprofile",
+          None,
+          storyIdToShow = Some("story-id-to-show")
+        )
+
+        val viewerProfil = ViewerProfile("viewerProfileIds")
+
+        storyDao.getById("story-id-to-show") returns Future.successful(Option(storyToShow))
+        storyDao.findRecommends(anyInt, anyString, any[List[String]], any[List[String]]) returns Future.successful(List())
+
+        val stories = Await.result(storyService.getById("story-id-to-show", token), 1.0 seconds)
+        stories.head mustEqual storyToShow
+
+        there was one(tokenDao).update(token.copy(storyIdToShow = None))
+      }
     }
   }
 }

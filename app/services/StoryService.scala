@@ -31,6 +31,15 @@ class StoryService @Inject()(eventDao: EventDao, storyDao: StoryDao, tokenDao: T
     story
   }
 
+  def getById(id: String, token: Token) = storyDao.getById(id).map { story =>
+    token.storyIdToShow match {
+      case Some(storyIdToShow) if storyIdToShow == id  =>
+        tokenDao.update(token.copy(storyIdToShow = None))
+      case _ =>
+    }
+    story
+  }
+
   def findRecommends(limit: Int, orderBy: String, viewerProfile: ViewerProfile, token: Token) = {
     val filteredTags = token.userId.isDefined match {
       case true =>
