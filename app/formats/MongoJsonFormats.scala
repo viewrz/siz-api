@@ -32,6 +32,10 @@ object MongoJsonFormats extends CommonJsonFormats {
     JsPath.json.update((JsPath \ key).json.copyFrom((JsPath \ key).json.pick orElse Reads.pure(Json.toJson(default)))) andThen r
   }
 
+  def withDefault[A](key: String, default: String)(r: Reads[A]) = {
+    JsPath.json.update((JsPath \ key).json.copyFrom((JsPath \ key).json.pick orElse Reads.pure(Json.toJson(default)))) andThen r
+  }
+
   implicit val tokenRead = mongoReadsStringId[Token](Json.reads[Token])
   implicit val tokenWrite = mongoWritesStringId[Token](Json.writes[Token])
   implicit val userRead = mongoReadsObjectId[User](Json.reads[User])
@@ -52,6 +56,6 @@ object MongoJsonFormats extends CommonJsonFormats {
   implicit val loopWrite = Json.writes[Loop]
   implicit val imageRead = Json.reads[Image]
   implicit val imageWrite = Json.writes[Image]
-  implicit val storyRead = mongoReadsObjectId[Story](Json.reads[Story])
+  implicit val storyRead = withDefault("privacy","Public")(mongoReadsObjectId[Story](Json.reads[Story]))
   implicit val storyWrite = mongoWritesObjectId[Story](Json.writes[Story])
 }

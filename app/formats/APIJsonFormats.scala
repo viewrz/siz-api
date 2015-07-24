@@ -69,7 +69,7 @@ trait APIJsonFormats extends CommonJsonFormats {
   implicit val sourceRead = typeReads[Source](Json.reads[Source])
 
   implicit val newStoryRead: Reads[NewStory]  = (
-    (JsPath \ "boxes").read[List[NewBox]] and
+    (JsPath \ "boxes").read[List[NewBox]](minLength[List[NewBox]](1) keepAnd maxLength[List[NewBox]](4)) and
       (JsPath \ "source").read[Source] and
       (JsPath \ "title").read[String](maxLength[String](100)) and
       (JsPath \ "tags").read[List[String]]
