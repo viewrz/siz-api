@@ -33,7 +33,7 @@ class StoryDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Reactiv
   updateDB
   def updateDB = {
     collection.indexesManager.ensure(Index(Seq("slug" -> IndexType.Ascending, "slug" -> IndexType.Ascending), name = Some("slugUniqueIndex"), unique = true))
-    collection.update(Json.obj("privacy" -> Json.obj("$exists" -> false)), Json.obj("$set" -> Json.obj("Privacy" -> "Public")), multi = true)
+    collection.update(Json.obj("privacy" -> Json.obj("$exists" -> false)), Json.obj("$set" -> Json.obj("privacy" -> "Public")), multi = true)
   }
 
   def findRecommends(limit: Int, orderBy: String = "creationDate", exceptStoryIds: List[String] = List(), exceptTags: List[String] = List()) =
