@@ -1,6 +1,6 @@
 package services
 
-import javax.inject.Inject
+import javax.inject.{Singleton, Inject}
 
 import dao.{EventDao, TokenDao}
 import models.Token
@@ -9,6 +9,7 @@ import reactivemongo.bson.BSONObjectID
 
 import scala.util.Random
 
+@Singleton
 class TokenService @Inject()(tokenDao: TokenDao, eventDao: EventDao) {
 
   val TOKEN_ID_SIZE = 64
