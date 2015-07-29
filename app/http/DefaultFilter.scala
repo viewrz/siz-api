@@ -1,12 +1,8 @@
 package http
 
-import javax.inject.Inject
-
-import filters.CORSFilter
+import filters.{TrustAllXForwardedForFilter, CORSFilter}
 import play.api.http.HttpFilters
-import play.api.mvc.EssentialFilter
 
 class DefaultFilter extends HttpFilters {
-
-  override val filters = Seq(CORSFilter)
+  override val filters = Seq(CORSFilter,TrustAllXForwardedForFilter)
 }
