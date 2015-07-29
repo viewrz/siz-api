@@ -24,7 +24,7 @@ class EventDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) {
   updateDB
 
   def updateDB = {
-    collection.indexesManager.ensure(Index(Seq("storyId" -> IndexType.Ascending, "viewerProfileId" -> IndexType.Ascending), name = Some("storyIdViewerProfileIdUniqueIndex"), unique = true, sparse = true))
+    collection.indexesManager.drop("storyIdViewerProfileIdUniqueIndex")
   }
 
   def newEventToEvent(newEvent: NewEvent, viewerProfileId: String, tags: List[String], ip: String): Event =
