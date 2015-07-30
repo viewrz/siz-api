@@ -1,0 +1,15 @@
+mongo:
+  image: mongo:2.6.10
+  command: mongod --smallfiles
+api:
+  build: .
+  environment:
+    MONGODB_URI: mongodb://mongo:27017/siz
+  ports:
+   - "9000:9000"
+  command: sbt test
+#  volumes:
+#   - .:/var/www/siz-api
+  links:
+   - mongo
+

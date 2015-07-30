@@ -17,15 +17,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     mongo.vm.provider "docker" do |d|
       d.image = "mongo"
       d.name = "siz-api-mongo"
-    end
-  end
-
-  config.vm.define "rethinkdb" do |rethinkdb|
-    rethinkdb.vm.provider "docker" do |d|
-      d.image = "jdauphant/rethinkdb:1.11.3"
-      d.name = "siz-api-rethinkdb"
-      d.ports = ["8080:8080"]
-      d.cmd = ["rethinkdb","--bind","all"]
+      d.ports = ["27017:27017"]
+      d.cmd = ["mongod", "--smallfiles"]
     end
   end
 
@@ -33,13 +26,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     siz_api.vm.synced_folder ".", "/var/www/siz-api"
 
     siz_api.vm.provider "docker" do |d|
-      d.image = "jdauphant/siz-api"
+      d.image = "quay.io/sizio/siz-api"
       d.name = "siz-api"
       d.link("siz-api-mongo:mongo")
-      d.link("siz-api-rethinkdb:rethinkdb")
+      d.env = { "MONGODB_URI" =>  "mongodb://mongo:27017/siz" }
       d.ports = ["9000:9000"]
       d.create_args = ["-t"]
-      d.cmd = ["sbt", "run", "-Dmongodb.uri=mongodb://mongo:27017/siz"]
+      d.cmd = ["sbt", "run"]
     end
   end
 end
