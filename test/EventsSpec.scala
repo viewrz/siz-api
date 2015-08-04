@@ -21,7 +21,7 @@ class EventsSpec extends Specification {
   private val storyDao = Application.instanceCache[StoryDao].apply(application)
 
   "Events" should {
-    "create a event" in new WithApplication{
+    "create a like event" in new WithApplication{
       val storyId = "14339467864855da8fe28614"
       val newStory = Story(boxes = List(), creationDate = new Date(), id = storyId,
         slug = "pepper-spray-events", source = Source("9dLmdVDjg1w","youtube",Some(1592000)), picture = Image("http://img.youtube.com/vi/9dLmdVDjg1w/0.jpg"), title = "Pepper Spray",

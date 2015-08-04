@@ -1,5 +1,4 @@
 import java.util.Date
-import javax.inject.Inject
 
 import dao.StoryDao
 import models._
