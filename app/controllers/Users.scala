@@ -87,7 +87,7 @@ class Users @Inject()(userDao: UserDao, tokenDao: TokenDao, tokenCheckAction: To
   def createUser(user: User)(token: Token): Future[Result] = {
     userDao.create(user).flatMap { lastError =>
       Logger.debug(s"Successfully inserted with LastError: $lastError")
-      tokenDao.updateToken(token, user.id).map(
+      tokenDao.update(token, user.id).map(
         token =>
           Created(Json.toJson(TopLevel(users = Some(user), tokens = Some(token))))
       )
@@ -149,7 +149,7 @@ class Users @Inject()(userDao: UserDao, tokenDao: TokenDao, tokenCheckAction: To
   def loginByEmail(email: String, loginPasswordHash: String)(token: Token): Future[Result] = userDao.findByEmail(email).flatMap {
     users => users match {
       case User(Some(`email`), Some(passwordHash), id, _, _, _, _, _) :: Nil if Hash.bcrypt_compare(loginPasswordHash, passwordHash) =>
-        tokenDao.updateToken(token, id).map(
+        tokenDao.update(token, id).map(
           token =>
             Ok(Json.toJson(TopLevel(users = Some(users.head), tokens = Some(token))))
         )
@@ -165,7 +165,7 @@ class Users @Inject()(userDao: UserDao, tokenDao: TokenDao, tokenCheckAction: To
   def loginByUsername(username: String, loginPasswordHash: String)(token: Token): Future[Result] = userDao.findByUsername(username).flatMap {
     users => users match {
       case User(_, Some(passwordHash), id, Some(`username`), _, _, _, _) :: Nil if Hash.bcrypt_compare(loginPasswordHash, passwordHash) =>
-        tokenDao.updateToken(token, id).map(
+        tokenDao.update(token, id).map(
           token =>
             Ok(Json.toJson(TopLevel(users = Some(users.head), tokens = Some(token))))
         )
@@ -185,7 +185,7 @@ class Users @Inject()(userDao: UserDao, tokenDao: TokenDao, tokenCheckAction: To
         userDao.findByFacebookUserId(facebookUserId).flatMap {
           users => users match {
             case User(_, _, id, _, _, Some(`facebookUserId`), _, _) :: Nil =>
-              tokenDao.updateToken(token, id).map(
+              tokenDao.update(token, id).map(
                 token =>
                   Ok(Json.toJson(TopLevel(users = Some(users.head), tokens = Some(token))))
               )

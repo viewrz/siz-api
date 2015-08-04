@@ -37,8 +37,17 @@ class StoryDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Reactiv
   }
 
   def findRecommends(limit: Int, orderBy: String = "creationDate", exceptStoryIds: List[String] = List(), exceptTags: List[String] = List()) =
-    collection.find(Json.obj("_id" -> Json.obj("$nin" -> exceptStoryIds.map(id => Json.obj("$oid" -> id))),
-      "tags" -> Json.obj("$not" -> Json.obj("$elemMatch" -> Json.obj("$in" -> exceptTags))),
+    collection.find(Json.obj(
+      "_id" -> Json.obj(
+        "$nin" -> exceptStoryIds.map(id => Json.obj("$oid" -> id))
+      ),
+      "tags" -> Json.obj(
+        "$not" -> Json.obj(
+          "$elemMatch" -> Json.obj(
+            "$in" -> exceptTags
+          )
+        )
+      ),
       "privacy" -> "Public")
     ).options(QueryOpts().batchSize(limit)).sort(Json.obj(orderBy -> -1)).cursor[Story]().collect[List](limit)
 

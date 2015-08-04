@@ -9,13 +9,12 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import reactivemongo.api.indexes.{IndexType, Index}
 import reactivemongo.bson.BSONObjectID
 
-
+import play.modules.reactivemongo.json._
+import play.modules.reactivemongo.json.collection._
+import formats.MongoJsonFormats._
 
 @Singleton
 class EventDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) {
-
-  implicit val eventRead = Json.reads[Event]
-  implicit val eventWrite = Json.writes[Event]
 
   lazy val db = reactiveMongoApi.db
 
@@ -25,10 +24,17 @@ class EventDao @Inject()(val reactiveMongoApi: ReactiveMongoApi) {
   updateDB
 
   def updateDB = {
-    collection.indexesManager.ensure(Index(Seq("storyId" -> IndexType.Ascending, "viewerProfileId" -> IndexType.Ascending), name = Some("storyIdViewerProfileIdUniqueIndex"), unique = true, sparse = true))
+    collection.indexesManager.drop("storyIdViewerProfileIdUniqueIndex")
   }
 
-  def newEventToEvent(newEvent: NewEvent, viewerProfileId: String, tags: List[String]): Event = Event(newEvent.storyId, newEvent._type, tags, viewerProfileId, BSONObjectID.generate.stringify)
+  def newEventToEvent(newEvent: NewEvent, viewerProfileId: String, tags: List[String], ip: String): Event =
+    Event(newEvent.storyId, newEvent._type, tags, viewerProfileId, BSONObjectID.generate.stringify, ip = ip)
 
   def addEvent(event: Event) = collection.insert(event)
+
+  def findLastOne(ip: String, _type: String) = collection.find(
+    Json.obj(
+      "ip" -> ip,
+      "type" -> _type)
+  ).sort(Json.obj("date" -> -1)).one[Event]
 }

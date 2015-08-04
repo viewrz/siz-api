@@ -38,11 +38,11 @@ object MongoJsonFormats extends CommonJsonFormats {
 
   implicit val tokenRead = mongoReadsStringId[Token](Json.reads[Token])
   implicit val tokenWrite = mongoWritesStringId[Token](Json.writes[Token])
-  implicit val userRead = mongoReadsObjectId[User](Json.reads[User])
-  implicit val userWrite = mongoWritesObjectId[User](Json.writes[User])
+  implicit val userRead = mongoReadsObjectId(Json.reads[User])
+  implicit val userWrite = mongoWritesObjectId(Json.writes[User])
 
-  implicit val eventRead = typeReads[Event](mongoReadsObjectId[Event](Json.reads[Event]))
-  implicit val eventWrite = typeWrites[Event](mongoWritesObjectId[Event](Json.writes[Event]))
+  implicit val eventRead = typeReads(mongoReadsObjectId(Json.reads[Event]))
+  implicit val eventWrite = typeWrites(mongoWritesObjectId(Json.writes[Event]))
 
   implicit val viewerProfileRead = withDefault("nopeStoryIds", List())(withDefault("likeStoryIds", List())(mongoReadsObjectId[ViewerProfile](Json.reads[ViewerProfile])))
   implicit val viewerProfileWrite = mongoWritesObjectId[ViewerProfile](Json.writes[ViewerProfile])

@@ -2,8 +2,8 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
-import actions.{LoggingAction, TokenCheckAction}
-import dao.{ViewerProfileDao, StoryDao}
+import actions.{TokenRequest, LoggingAction, TokenCheckAction}
+import dao.{TokenDao, ViewerProfileDao, StoryDao}
 import formats.APIJsonFormats
 
 import models._
@@ -11,37 +11,31 @@ import dto._
 import play.api.mvc._
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
+import services.StoryService
 
 import scala.concurrent.Future
 
 @Singleton
-class Stories @Inject()(storyDao: StoryDao, tokenCheckAction: TokenCheckAction, viewerProfileDao: ViewerProfileDao) extends Controller with APIJsonFormats {
+class Stories @Inject()(tokenDao: TokenDao, storyService: StoryService, storyDao: StoryDao, tokenCheckAction: TokenCheckAction, viewerProfileDao: ViewerProfileDao) extends Controller with APIJsonFormats {
 
   def dispatcher(limit: Int, orderBy: String, filterBy: String, slug: Option[String], sinceId: Option[String], lastSkippedId: Option[String]) = LoggingAction {
     tokenCheckAction.async { request =>
       slug match {
         case None =>
-          find(limit, orderBy, request.token.viewerProfileId, request.token.userId.isDefined, filterBy, sinceId, lastSkippedId)
+          find(limit, orderBy, request.token.viewerProfileId, request.token, filterBy, sinceId, lastSkippedId)
         case Some(slug) =>
-          getBySlug(slug)
+          getBySlug(slug)(request)
       }
     }
   }
 
-  def find(limit: Int, orderBy: String, viewerProfileId: String, tagsFilter: Boolean, filterBy: String, sinceId: Option[String], lastSkippedId: Option[String]) = {
-    val removeTagsWithWeight = -3
+  def find(limit: Int, orderBy: String, viewerProfileId: String, token: Token, filterBy: String, sinceId: Option[String], lastSkippedId: Option[String]) = {
     viewerProfileDao.findById(viewerProfileId).flatMap {
       viewerProfile =>
-        val filteredTags = tagsFilter match {
-          case true =>
-            viewerProfile.tagsFilterBy(_._2 <= removeTagsWithWeight)
-          case false =>
-            List()
-        }
         filterBy match {
           case "recommends" =>
-            val futureStories = storyDao.findRecommends(limit, orderBy, viewerProfile.likeStoryIds ::: viewerProfile.nopeStoryIds, filteredTags)
+            val futureStories = storyService.findRecommends(limit, orderBy, viewerProfile, token)
             futureStories.map {
               results =>
                 Ok(Json.toJson(TopLevel(stories = Some(Right(results)))))
@@ -77,7 +71,7 @@ class Stories @Inject()(storyDao: StoryDao, tokenCheckAction: TokenCheckAction, 
 
   def getById(id: String) = LoggingAction {
     tokenCheckAction.async { request =>
-      storyDao.getById(id).map {
+      storyService.getById(id,request.token).map {
         case None =>
           NotFound(Error.toTopLevelJson(Error("No story for this id %s".format(id))))
         case Some(story) =>
@@ -86,7 +80,7 @@ class Stories @Inject()(storyDao: StoryDao, tokenCheckAction: TokenCheckAction, 
     }
   }
 
-  def getBySlug(slug: String) = storyDao.getBySlug(slug).map {
+  def getBySlug(slug: String)(implicit request: TokenRequest[_]) = storyService.getBySlug(slug, request.token, request.remoteAddress).map {
     case None =>
       NotFound(Error.toTopLevelJson(Error("No story for this slug %s".format(slug))))
     case Some(story) =>
