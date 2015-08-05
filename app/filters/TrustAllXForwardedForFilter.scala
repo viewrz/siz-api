@@ -1,5 +1,6 @@
 package filters
 
+import play.Logger
 import play.api.mvc.{Filter, Result, RequestHeader}
 
 import scala.concurrent.Future
@@ -11,7 +12,12 @@ object TrustAllXForwardedForFilter extends Filter {
     val newRequestHeader: RequestHeader =
       requestHeader.headers.get("X-Forwarded-For")
         .flatMap(_.split(',').headOption)
-        .map(ip => requestHeader.copy(remoteAddress = ip))
+        .map(
+          ip => {
+            Logger.info(s"Analyzed X-Forwarded-For header and retrieved $ip")
+            requestHeader.copy(remoteAddress = ip)
+          }
+        )
         .getOrElse(requestHeader)
 
     nextFilter(newRequestHeader)
