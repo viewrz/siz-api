@@ -16,14 +16,23 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.reactivemongo" %% "play2-reactivemongo"  % "0.11.2.play24",
-  "org.mindrot"       %  "jbcrypt"              % "0.3m",
-  "com.kifi"          %% "franz"                % "0.3.10",
-  specs2              %   Test,
+  "org.reactivemongo" %% "play2-reactivemongo" % "0.11.2.play24",
+  "org.mindrot" % "jbcrypt" % "0.3m",
+  "com.kifi" %% "franz" % "0.3.10",
+  // la dependance com.kifi.franz en version 0.3.10" tire des dépendance mauvaises. On doit forcer celles qui sont en conflit.
+  "org.scala-lang" % "scala-compiler" % "2.11.7",
+  "org.scala-lang" % "scala-library" % "2.11.7",
+  "org.scala-lang" % "scala-reflect" % "2.11.7",
+  specs2 % Test,
   ws
 )
 
-scalacOptions ++= Seq("-unchecked", "-deprecation","-feature")
+dependencyOverrides +=
+  // pareil pour sprong facebook
+  "com.google.guava" % "guava" % "18.0"
+
+
+scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
 
 // Pidfile add problem when docker try to restart
 javaOptions in Universal ++= Seq(
