@@ -6,8 +6,7 @@ import play.api.mvc.{Filter, Result, RequestHeader}
 import scala.concurrent.Future
 
 object TrustAllXForwardedForFilter extends Filter {
-  def apply(nextFilter: (RequestHeader) => Future[Result]
-             )(requestHeader: RequestHeader): Future[Result] = {
+  override def apply(nextFilter: (RequestHeader) => Future[Result])(requestHeader: RequestHeader): Future[Result] = {
 
     val newRequestHeader: RequestHeader =
       requestHeader.headers.get("X-Forwarded-For")

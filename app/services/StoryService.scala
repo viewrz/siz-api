@@ -4,6 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import dao.{TokenDao, EventDao, StoryDao}
 import models._
+import play.Logger
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 @Singleton
@@ -33,7 +34,10 @@ class StoryService @Inject()(eventDao: EventDao, storyDao: StoryDao, tokenDao: T
 
   def getById(id: String, token: Token) = storyDao.getById(id).map { story =>
     token.storyIdToShow match {
-      case Some(storyIdToShow) if storyIdToShow == id  =>
+      case Some(storyIdToShow) if storyIdToShow == id =>
+        // Si le token fourni correspond à la story en cours de recup, on met à jour le token pour éviter que
+        // le visiteur aie de nouveau la story pushée à lui.
+        Logger.info(s"Found story whose id is matching the token storyIdToShow. story is ${token.storyIdToShow}")
         tokenDao.update(token.copy(storyIdToShow = None))
       case _ =>
     }
@@ -53,6 +57,7 @@ class StoryService @Inject()(eventDao: EventDao, storyDao: StoryDao, tokenDao: T
       case Some(storyId) =>
         // If we have a storyIdToShow, inject this story in first place and remove it from the token
         tokenDao.update(token.copy(storyIdToShow = None))
+        Logger.info(s"Push story in recommends. story is ${token.storyIdToShow}")
         storyDao.getById(storyId).flatMap {
           case Some(story) =>
             futureStories.map(story :: _)
