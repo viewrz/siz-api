@@ -8,6 +8,7 @@ import formats.APIJsonFormats
 
 import models._
 import dto._
+import play.Logger
 import play.api.mvc._
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -19,10 +20,14 @@ import scala.concurrent.Future
 @Singleton
 class Stories @Inject()(tokenDao: TokenDao, storyService: StoryService, storyDao: StoryDao, tokenCheckAction: TokenCheckAction, viewerProfileDao: ViewerProfileDao) extends Controller with APIJsonFormats {
 
-  def dispatcher(limit: Int, orderBy: String, filterBy: String, slug: Option[String], sinceId: Option[String], lastSkippedId: Option[String]) = LoggingAction {
+  def dispatcher(
+                  limit: Int, orderBy: String, filterBy: String,
+                  slug: Option[String], sinceId: Option[String], lastSkippedId: Option[String]) = LoggingAction {
     tokenCheckAction.async { request =>
+      Logger.info(s"start matching $slug")
       slug match {
         case None =>
+          Logger.info("no specific slug required")
           find(limit, orderBy, request.token.viewerProfileId, request.token, filterBy, sinceId, lastSkippedId)
         case Some(slug) =>
           getBySlug(slug)(request)
@@ -33,6 +38,7 @@ class Stories @Inject()(tokenDao: TokenDao, storyService: StoryService, storyDao
   def find(limit: Int, orderBy: String, viewerProfileId: String, token: Token, filterBy: String, sinceId: Option[String], lastSkippedId: Option[String]) = {
     viewerProfileDao.findById(viewerProfileId).flatMap {
       viewerProfile =>
+        Logger.info(s"filterby $filterBy")
         filterBy match {
           case "recommends" =>
             val futureStories = storyService.findRecommends(limit, orderBy, viewerProfile, token)
@@ -71,7 +77,7 @@ class Stories @Inject()(tokenDao: TokenDao, storyService: StoryService, storyDao
 
   def getById(id: String) = LoggingAction {
     tokenCheckAction.async { request =>
-      storyService.getById(id,request.token).map {
+      storyService.getById(id, request.token).map {
         case None =>
           NotFound(Error.toTopLevelJson(Error("No story for this id %s".format(id))))
         case Some(story) =>

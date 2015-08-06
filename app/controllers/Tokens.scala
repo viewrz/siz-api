@@ -1,6 +1,6 @@
 package controllers
 
-import javax.inject.Inject
+import javax.inject.{Singleton, Inject}
 
 import actions.{TokenCheckAction, LoggingAction}
 import dao.{TokenDao, UserDao}
@@ -15,9 +15,8 @@ import services.TokenService
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
+@Singleton
 class Tokens @Inject()(userDao: UserDao, tokenService: TokenService, tokenCheckAction: TokenCheckAction, userController: Users) extends Controller with APIJsonFormats {
-
-
   def create = LoggingAction {
     Action.async(BodyParsers.parse.tolerantJson) { request =>
       tokenService.newToken(request.remoteAddress).map {

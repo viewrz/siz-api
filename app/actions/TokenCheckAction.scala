@@ -19,7 +19,7 @@ class TokenRequest[A](val token: Token, request: Request[A]) extends WrappedRequ
 class TokenCheckAction @Inject() (tokenDao: TokenDao) extends ActionBuilder[TokenRequest] with ActionRefiner[Request, TokenRequest] {
   val access_token_header = Play.configuration.getString("api.accesstokenheader").get
 
-  def refine[A](request: Request[A]) =
+  override def refine[A](request: Request[A]) =
     request.headers.get(access_token_header) match {
       case None =>
         Future.successful {
