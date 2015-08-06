@@ -1,6 +1,7 @@
 package http
 
 import models.Error
+import play.Logger
 import play.api.http.HttpErrorHandler
 import play.api.mvc.Results._
 import play.api.mvc.{Result, RequestHeader}
@@ -24,5 +25,8 @@ class GlobalErrorHandler extends HttpErrorHandler {
 
   override def onServerError(request: RequestHeader,
                              exception: Throwable):
-  Future[Result] = Future.successful(InternalServerError(Error.toTopLevelJson(Error("Internal api error, try later"))))
+  Future[Result] = {
+    Logger.error("Server Error", exception)
+    Future.successful(InternalServerError(Error.toTopLevelJson(Error("Internal api error, try later"))))
+  }
 }
