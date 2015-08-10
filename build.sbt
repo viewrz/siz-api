@@ -19,12 +19,14 @@ libraryDependencies ++= Seq(
   "org.reactivemongo" %% "play2-reactivemongo" % "0.11.2.play24",
   "org.mindrot" % "jbcrypt" % "0.3m",
   "com.kifi" %% "franz" % "0.3.10",
+  "com.logentries" % "logentries-appender" % "1.1.30",
+  "org.codehaus.janino" % "janino" % "2.7.8",
+  specs2 % Test,
+  ws,
   // la dependance com.kifi.franz en version 0.3.10" tire des dépendance mauvaises. On doit forcer celles qui sont en conflit.
   "org.scala-lang" % "scala-compiler" % "2.11.7",
   "org.scala-lang" % "scala-library" % "2.11.7",
-  "org.scala-lang" % "scala-reflect" % "2.11.7",
-  specs2 % Test,
-  ws
+  "org.scala-lang" % "scala-reflect" % "2.11.7"
 )
 
 dependencyOverrides +=
