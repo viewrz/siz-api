@@ -22,7 +22,7 @@
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>[%contextName][%date][%level][%class{36}:%L] - %message%n%xException{5}</pattern>
+            <pattern>[%X{token_id}][%X{user_id}][%contextName][%date][%level][%class{36}:%L] - %message%n%xException{5}</pattern>
         </encoder>
     </appender>
 
