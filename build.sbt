@@ -26,7 +26,9 @@ libraryDependencies ++= Seq(
   // la dependance com.kifi.franz en version 0.3.10" tire des dépendance mauvaises. On doit forcer celles qui sont en conflit.
   "org.scala-lang" % "scala-compiler" % "2.11.7",
   "org.scala-lang" % "scala-library" % "2.11.7",
-  "org.scala-lang" % "scala-reflect" % "2.11.7"
+  "org.scala-lang" % "scala-reflect" % "2.11.7",
+  //webjars
+  "org.webjars" % "swagger-ui" % "2.1.1"
 )
 
 dependencyOverrides +=

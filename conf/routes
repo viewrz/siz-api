@@ -15,4 +15,5 @@ GET     /stories                           controllers.Stories.dispatcher(limit:
 GET     /stories/$id<[0-9a-z]{24}>         controllers.Stories.getById(id)
 POST    /stories                           controllers.Stories.generateStories()
 POST    /events                            controllers.Events.create
-OPTIONS  /*path                            controllers.Options.all(path)
+OPTIONS /*path                             controllers.Options.all(path)
+GET     /assets/*file                      controllers.Assets.at(path="/public", file)
