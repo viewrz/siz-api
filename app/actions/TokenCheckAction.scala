@@ -1,18 +1,15 @@
 package actions
 
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import javax.inject.{Singleton, Inject}
+import javax.inject.{Inject, Singleton}
 
 import dao.TokenDao
-import models.{User, Token, Error}
+import models.{Error, Token}
 import org.slf4j.MDC
 import play.api.Play
-import play.api.mvc._
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.Play.current
-
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc.Results._
+import play.api.mvc._
 
 import scala.concurrent.Future
 
