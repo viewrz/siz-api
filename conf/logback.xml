@@ -34,7 +34,7 @@
                 <Ssl>true</Ssl>
                 <facility>USER</facility>
                 <layout>
-                    <pattern>[%X{token_id}][%X{user_id}] %d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n%xException{5}</pattern>
+                    <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - [%X{token_id}][%X{user_id}] - %msg%n%xException{5}</pattern>
                 </layout>
             </appender>
         </then>

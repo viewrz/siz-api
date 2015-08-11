@@ -32,7 +32,7 @@ class TokenCheckAction @Inject()(tokenDao: TokenDao) extends ActionBuilder[Token
         tokenDao.findById(access_token).map {
           case token :: Nil if token.id == access_token => {
             MDC.put("token_id", token.id)
-            token.userId.map(MDC.put("user_id", _))
+            token.userId.map(id => MDC.put("user_id", id.substring(0, 8)))
             Right(new TokenRequest(token, request))
           }
           case _ =>
