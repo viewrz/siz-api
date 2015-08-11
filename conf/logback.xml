@@ -22,7 +22,7 @@
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>[%X{token_id}][%X{user_id}][%contextName][%date][%level][%class{36}:%L] - %message%n%xException{5}</pattern>
+            <pattern>[%contextName][%date][%level][%thread][%class{36}:%L] - %message%n%xException{5}</pattern>
         </encoder>
     </appender>
 
@@ -34,7 +34,7 @@
                 <Ssl>true</Ssl>
                 <facility>USER</facility>
                 <layout>
-                    <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+                    <pattern>[%X{token_id}][%X{user_id}] %d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n%xException{5}</pattern>
                 </layout>
             </appender>
         </then>
