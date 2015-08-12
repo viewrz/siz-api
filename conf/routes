@@ -3,17 +3,19 @@
 # ~~~~
 
 # Home page
-GET     /                                  controllers.Application.index
-GET     /api/health                        controllers.Application.health
-POST    /users                             controllers.Users.create
-GET     /users/:id                         controllers.Users.get(id)
-POST    /tokens                            controllers.Tokens.create
-PUT     /tokens/:id                        controllers.Tokens.update(id)
-GET     /emails/:email                     controllers.Users.checkEmail(email)
-GET     /usernames/:username               controllers.Users.checkUsername(username)
-GET     /stories                           controllers.Stories.dispatcher(limit: Int ?= 12, orderBy: String ?= "creationDate", filterBy: String ?= "recommends", slug: Option[String] ?= None, sinceId: Option[String] ?= None, lastSkippedId: Option[String] ?= None)
-GET     /stories/$id<[0-9a-z]{24}>         controllers.Stories.getById(id)
-POST    /stories                           controllers.Stories.generateStories()
-POST    /events                            controllers.Events.create
-OPTIONS /*path                             controllers.Options.all(path)
-GET     /assets/*file                      controllers.Assets.at(path="/public", file)
+GET     /                                     controllers.Application.index
+GET     /api/health                           controllers.Application.health
+POST    /users                                controllers.Users.create
+GET     /users/:id                            controllers.Users.get(id)
+POST    /tokens                               controllers.Tokens.create
+PUT     /tokens/:id                           controllers.Tokens.update(id)
+GET     /emails/:email                        controllers.Users.checkEmail(email)
+GET     /usernames/:username                  controllers.Users.checkUsername(username)
+GET     /stories                              controllers.Stories.dispatcher(limit: Int ?= 12, orderBy: String ?= "creationDate", filterBy: String ?= "recommends", slug: Option[String] ?= None, sinceId: Option[String] ?= None, lastSkippedId: Option[String] ?= None)
+GET     /stories/$id<[0-9a-z]{24}>            controllers.Stories.getById(id)
+POST    /stories                              controllers.Stories.generateStories()
+POST    /events                               controllers.Events.create
+OPTIONS /*path                                controllers.Options.all(path)
+GET     /assets/lib/swagger-ui/index.html     controllers.Assets.at(path="/public", file = "swagger-index.html")
+GET     /assets/*file                         controllers.Assets.at(path="/public", file)
+GET     /v1/swagger.yaml                       controllers.Assets.at(path="/public", file = "swagger.yaml")
